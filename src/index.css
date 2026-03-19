@@ -1,0 +1,145 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* OLED Black Theme */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 100%;
+
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 100%;
+
+    /* Neon Green Primary */
+    --primary: 110 100% 55%;
+    --primary-foreground: 0 0% 0%;
+
+    /* Electric Purple Secondary */
+    --secondary: 271 76% 53%;
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 60%;
+
+    --accent: 271 76% 53%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 110 100% 55%;
+
+    --radius: 0.75rem;
+
+    /* Custom Design Tokens */
+    --neon-green: 110 100% 55%;
+    --electric-purple: 271 76% 53%;
+    --glass-bg: 0 0% 100% / 0.05;
+    --glass-border: 0 0% 100% / 0.1;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(110 100% 55%), hsl(271 76% 53%));
+    --gradient-text: linear-gradient(90deg, hsl(0 0% 100%), hsl(110 100% 55%), hsl(271 76% 53%));
+    --gradient-glow: radial-gradient(ellipse at center, hsl(110 100% 55% / 0.3), transparent 70%);
+    
+    /* Shadows */
+    --shadow-neon: 0 0 30px hsl(110 100% 55% / 0.5);
+    --shadow-purple: 0 0 30px hsl(271 76% 53% / 0.5);
+    --shadow-glass: 0 8px 32px hsl(0 0% 0% / 0.4);
+
+    --sidebar-background: 0 0% 4%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 110 100% 55%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 271 76% 53%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 0 0% 15%;
+    --sidebar-ring: 110 100% 55%;
+  }
+
+  .dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 4%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 4%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 110 100% 55%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 271 76% 53%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 271 76% 53%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 110 100% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Space Grotesk', sans-serif;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-card/50 backdrop-blur-xl border border-border/20 shadow-lg;
+  }
+
+  .gradient-text {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-text);
+  }
+
+  .neon-glow {
+    box-shadow: var(--shadow-neon);
+  }
+
+  .purple-glow {
+    box-shadow: var(--shadow-purple);
+  }
+
+  .glow-aura {
+    position: relative;
+  }
+
+  .glow-aura::before {
+    content: '';
+    position: absolute;
+    inset: -20px;
+    background: var(--gradient-glow);
+    border-radius: inherit;
+    filter: blur(40px);
+    opacity: 0.6;
+    z-index: -1;
+    transition: opacity 0.3s ease;
+  }
+
+  .glow-aura:hover::before {
+    opacity: 1;
+  }
+}
+
+@layer utilities {
+  .text-glow {
+    text-shadow: 0 0 20px hsl(var(--neon-green) / 0.5);
+  }
+}
