@@ -25,43 +25,41 @@ export default function AgentChat({ isOpen, onClose }: AgentChatProps) {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Rola para o fim sempre que uma nova mensagem chega
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isLoading]);
 
   const handleSend = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim()) return;
+  e.preventDefault();
+  if (!input.trim()) return;
 
-    const userMessage: Message = { id: Date.now().toString(), role: 'user', content: input };
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
-    setIsLoading(true);
+  const userMessage: Message = { id: Date.now().toString(), role: 'user', content: input };
+  setMessages(prev => [...prev, userMessage]);
+  setInput('');
+  setIsLoading(true);
 
-    try {
-      // Faz a chamada para a nossa API Python!
-      const response = await axios.post('http://127.0.0.1:8000/api/agent/chat', {
-        mensagem: userMessage.content
-      });
+  try {
+    const response = await axios.post('http://localhost:8000/api/agent/chat', 
+      { mensagem: userMessage.content },
+      { timeout: 15000 } // 15 segundos de limite para não carregar infinito
+    );
 
-      const agentMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'agent',
-        content: response.data.resposta
-      };
-      setMessages(prev => [...prev, agentMessage]);
-    } catch (error) {
-      setMessages(prev => [...prev, { 
-        id: Date.now().toString(), 
-        role: 'agent', 
-        content: '🚨 Erro de conexão com o Núcleo DDX. Verifique se o backend (FastAPI) está rodando.' 
-      }]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+    setMessages(prev => [...prev, {
+      id: (Date.now() + 1).toString(),
+      role: 'agent',
+      content: response.data.resposta
+    }]);
+  } catch (error) {
+    setMessages(prev => [...prev, { 
+      id: Date.now().toString(), 
+      role: 'agent', 
+      content: '🚨 O Núcleo DDX demorou a responder ou está offline. Tente novamente.' 
+    }]);
+  } finally {
+    setIsLoading(false);
+  }
+};
   if (!isOpen) return null;
 
   return (

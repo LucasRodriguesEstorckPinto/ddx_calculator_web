@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import Background3D from './components/Background3D';
 import AgentChat from './components/AgentChat';
+import PlotWindow from './components/PlotWindow'; // <-- IMPORTADO
 import { 
   Menu, ArrowRight, Sigma, TrendingUp, Layers, 
   LineChart, Zap, BookOpen, Code2, Video, MessageSquare,
@@ -8,14 +10,35 @@ import {
 } from 'lucide-react';
 
 export default function App() {
-  // AQUI ESTÁ O ESTADO DO CHAT (SEM ERRO AGORA)
   const [isChatOpen, setIsChatOpen] = useState(false);
+  
+  // ESTADOS DO LABORATÓRIO DE CÁLCULO
+  const [plotData, setPlotData] = useState(null);
+  const [funcaoInput, setFuncaoInput] = useState('x**2');
+  const [isPlotLoading, setIsPlotLoading] = useState(false);
+
+  // FUNÇÃO PARA GERAR O GRÁFICO
+  const handleGeneratePlot = async () => {
+    setIsPlotLoading(true);
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/api/math/plot', {
+        expressao: funcaoInput,
+        x_min: -10,
+        x_max: 10
+      });
+      setPlotData(response.data);
+    } catch (error) {
+      console.error("Erro ao gerar gráfico:", error);
+      alert("Erro ao processar a função. Tente algo como x**2 ou sin(x).");
+    } finally {
+      setIsPlotLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen text-white font-sans overflow-x-hidden relative">
       <Background3D />
       
-      {/* COMPONENTE DO CHAT SENDO RENDERIZADO AQUI */}
       <AgentChat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
 
       {/* NAVBAR */}
@@ -54,7 +77,6 @@ export default function App() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 mb-20">
-          {/* BOTÃO QUE ABRE O CHAT */}
           <button 
             onClick={() => setIsChatOpen(true)}
             className="px-8 py-4 bg-[#39FF14] text-black font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-[#32e011] transition-all hover:shadow-[0_0_30px_rgba(57,255,20,0.4)]"
@@ -79,11 +101,39 @@ export default function App() {
             </div>
           ))}
         </div>
+      </section>
 
-        <div className="absolute bottom-10 animate-bounce">
-          <div className="w-8 h-12 border-2 border-white/20 rounded-full flex justify-center p-2 bg-[#050505]/50 backdrop-blur-sm">
-            <div className="w-1 h-3 bg-[#39FF14] rounded-full" />
+      {/* NOVO: CALCULUS LAB (SEÇÃO DE GRÁFICOS) */}
+      <section className="py-24 px-6 relative z-10 max-w-6xl mx-auto">
+        <div className="text-center mb-12">
+          <span className="text-purple-500 font-semibold text-sm tracking-wider uppercase mb-4 block">Laboratório</span>
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">Calculus <span className="text-[#39FF14]">Lab</span></h2>
+          <p className="text-gray-400 max-w-2xl mx-auto">Visualize funções instantaneamente. O DDX processa sua expressão no backend e renderiza um gráfico interativo de alta precisão.</p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-8">
+          <div className="bg-[#0a0a0a]/60 backdrop-blur-md border border-white/10 p-8 rounded-3xl flex flex-col md:flex-row gap-6 items-end shadow-2xl">
+            <div className="flex-1 w-full">
+              <label className="text-xs text-gray-500 uppercase tracking-[0.2em] mb-3 block font-bold">Função Matemática f(x)</label>
+              <input 
+                value={funcaoInput}
+                onChange={(e) => setFuncaoInput(e.target.value)}
+                placeholder="Ex: x**3 - 4*x"
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-5 py-4 text-[#39FF14] font-mono text-lg focus:outline-none focus:border-[#39FF14]/40 transition-all"
+              />
+            </div>
+            <button 
+              onClick={handleGeneratePlot}
+              disabled={isPlotLoading}
+              className="w-full md:w-auto px-10 py-4 bg-[#39FF14] text-black font-black rounded-xl hover:bg-[#32e011] transition-all hover:shadow-[0_0_25px_rgba(57,255,20,0.3)] disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {isPlotLoading ? <LineChart className="animate-pulse" /> : <TrendingUp size={20} />}
+              {isPlotLoading ? 'PROCESSANDO...' : 'PLOTAR AGORA'}
+            </button>
           </div>
+
+          {/* JANELA DO GRÁFICO */}
+          <PlotWindow data={plotData} isVisible={plotData !== null} />
         </div>
       </section>
 

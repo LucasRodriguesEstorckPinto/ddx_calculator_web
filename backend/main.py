@@ -1,134 +1,146 @@
-# backend/main.py
+
 import os
+import google.generativeai as genai
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import sympy as sp
-import numpy as np
 from dotenv import load_dotenv
+import numpy as np
+import sympy as sp
 
-from langchain_core.tools import tool
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langgraph.prebuilt import create_react_agent
-
-# Carrega a chave de API do ficheiro .env
 load_dotenv()
 
-app = FastAPI(title="DDX Neon Core", version="2.0.0")
+# Configuração Direta do Google SDK (Sem LangChain)
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+
+# Instruções de Sistema
+SYSTEM_PROMPT = """Você é o Agente DDX (UERJ/IPRJ).
+REGRAS:
+1. Responda APENAS sobre matemática, cálculo e física.
+2. Para qualquer outro assunto, responda EXATAMENTE: "Desculpe, mas eu sou um motor matemático e só cumpro tarefas relacionadas a cálculo e matemática."
+3. Use LaTeX: $ para linha e $$ para blocos. Ex: $\\sin(x)$.
+4. Responda de forma direta e acadêmica."""
+
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# --- 1. FERRAMENTAS MATEMÁTICAS ---
-
-@tool
-def tool_calcular_derivada(expressao: str, variavel: str = 'x') -> str:
-    """Calcula a derivada de uma função matemática."""
-    try:
-        x = sp.Symbol(variavel)
-        func = sp.sympify(expressao)
-        derivada = sp.diff(func, x)
-        return f"A derivada é: {sp.latex(derivada)}"
-    except Exception as e:
-        return f"Erro ao calcular derivada: {str(e)}"
-
-@tool
-def tool_calcular_integral(expressao: str, variavel: str = 'x') -> str:
-    """Calcula a integral indefinida de uma função matemática."""
-    try:
-        x = sp.Symbol(variavel)
-        func = sp.sympify(expressao)
-        integral = sp.integrate(func, x)
-        return f"A integral é: {sp.latex(integral)}"
-    except Exception as e:
-        return f"Erro ao calcular integral: {str(e)}"
-
-tools = [tool_calcular_derivada, tool_calcular_integral]
-
-# --- 2. INSTRUÇÕES RESTRITAS DO SISTEMA (O ESCUDO) ---
-
-INSTRUCOES_SISTEMA = """Você é o Agente DDX, um assistente acadêmico avançado criado pela UERJ/IPRJ, estritamente focado em Matemática e Cálculo.
-
-REGRAS ABSOLUTAS E INQUEBRÁVEIS:
-1. TRAVA DE CONTEXTO: Você SÓ pode cumprir tarefas relacionadas a cálculo, matemática, álgebra, física ou análise numérica.
-2. RECUSA DE TAREFAS: Se o usuário pedir treinos de academia, receitas, códigos de programação, textos ou qualquer assunto fora de matemática, VOCÊ ESTÁ PROIBIDO DE USAR QUALQUER FERRAMENTA (TOOL). Não tente calcular nada. Apenas responda IMEDIATAMENTE com: "Desculpe, mas eu sou um motor matemático e só cumpro tarefas relacionadas a cálculo e matemática."
-3. FORMATAÇÃO OBRIGATÓRIA (LaTeX): Todas as fórmulas, equações e variáveis DEVEM ser formatadas em LaTeX puro para que o frontend renderize corretamente. 
-   - Use o símbolo de dólar simples para matemática na mesma linha. Exemplo: $f(x) = x^2$
-   - Use o símbolo de dólar duplo para blocos de matemática isolados. Exemplo: $$\\int x^2 dx = \\frac{x^3}{3}$$
-   - Nunca use blocos de código markdown com crases para matemática.
-"""
-
-# Inicializa o LLM e o Agente com a trava
-llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", temperature=0, max_retries=1)
-agente_ddx = create_react_agent(llm, tools, state_modifier=INSTRUCOES_SISTEMA)
-
-# --- 3. MODELOS DE DADOS ---
-
 class ChatRequest(BaseModel):
     mensagem: str
 
-class ExpressaoRequest(BaseModel):
-    expressao: str
-    variavel: str = 'x'
 
 class PlotRequest(BaseModel):
     expressao: str
-    variavel: str = 'x'
     x_min: float = -10.0
     x_max: float = 10.0
 
-# --- 4. ENDPOINTS DA API ---
+@app.post("/api/math/plot")
+async def gerar_grafico(req: PlotRequest):
+    try:
+        x_sym = sp.Symbol('x', real=True)
+        # Limpeza da expressão para o SymPy
+        raw_expr = req.expressao.replace("y =", "").replace("^", "**").strip()
+        expr = sp.sympify(raw_expr)
+
+        # 1. DERIVADAS PARA ANÁLISE
+        d1 = sp.diff(expr, x_sym)
+        d2 = sp.diff(d1, x_sym)
+
+        # Função auxiliar para extrair pontos reais com segurança
+        def extrair_pontos(derivada, expressao_original):
+            pontos = []
+            try:
+                # Tentamos resolver a derivada = 0
+                solucoes = sp.solve(derivada, x_sym)
+                for s in solucoes:
+                    # Garantimos que o ponto é real e está dentro do range visual
+                    if s.is_real and req.x_min <= float(s) <= req.x_max:
+                        y_val = float(expressao_original.subs(x_sym, s))
+                        pontos.append({"x": float(s), "y": y_val})
+            except: pass 
+            return pontos
+
+        # 2. CÁLCULO DOS PONTOS CRÍTICOS E INFLEXÃO
+        todos_criticos = extrair_pontos(d1, expr)
+        inflexao = extrair_pontos(d2, expr)
+        
+        # Classificação usando o teste da segunda derivada
+        maximos = []
+        minimos = []
+        for p in todos_criticos:
+            teste = float(d2.subs(x_sym, p['x']))
+            if teste < 0: maximos.append(p)
+            elif teste > 0: minimos.append(p)
+
+        # 3. CÁLCULO DE ASSÍNTOTAS (Lógica de Limites)
+        assintotas = {"verticais": [], "horizontais": [], "obliquas": []}
+        
+        # Verticais: Singularidades reais
+        try:
+            sing = sp.singularities(expr, x_sym)
+            assintotas["verticais"] = [float(s) for s in sing if s.is_real]
+        except: pass
+
+        # Horizontais: Limites no infinito
+        try:
+            L_pos = sp.limit(expr, x_sym, sp.oo)
+            if L_pos.is_real: assintotas["horizontais"].append(float(L_pos))
+            L_neg = sp.limit(expr, x_sym, -sp.oo)
+            if L_neg.is_real and L_neg != L_pos: assintotas["horizontais"].append(float(L_neg))
+        except: pass
+
+        # 4. GERAÇÃO DOS DADOS DO GRÁFICO (NumPy)
+        f_num = sp.lambdify(x_sym, expr, modules=['numpy'])
+        x_plot = np.linspace(req.x_min, req.x_max, 800)
+        y_plot = f_num(x_plot)
+        
+        # Limpeza de valores não numéricos para o JSON
+        y_plot = np.where(np.isfinite(y_plot), y_plot, None)
+
+        return {
+            "sucesso": True,
+            "x": x_plot.tolist(),
+            "y": y_plot.tolist(),
+            "latex": sp.latex(expr),
+            "analise": {
+                "maximos": maximos,
+                "minimos": minimos,
+                "inflexao": inflexao,
+                "assintotas": assintotas
+            }
+        }
+    except Exception as e:
+        print(f"Erro no processamento: {e}")
+        raise HTTPException(status_code=400, detail="Erro ao analisar a função.")
 
 @app.post("/api/agent/chat")
-def chat_com_agente(req: ChatRequest):  # <-- Tirei o async
-    print("\n--- NOVA REQUISIÇÃO ---")
-    print(f"1. O frontend pediu: '{req.mensagem}'")
-    
+async def chat_endpoint(req: ChatRequest):
     try:
-        print("2. Acordando o Agente Gemini...")
+        # Inicializa o modelo (Gemini 2.0 Flash é o padrão ouro de 2026)
+        model = genai.GenerativeModel(
+            model_name="gemini-2.5-flash",
+            system_instruction=SYSTEM_PROMPT
+        )
         
-        # Tiramos o await e usamos o invoke padrão (muito mais seguro no Mac local)
-        resposta_ia = agente_ddx.invoke({"messages": [("user", req.mensagem)]})
-        
-        print("3. O Gemini processou e devolveu a resposta!")
-        texto_final = resposta_ia["messages"][-1].content
+        # Chamada assíncrona nativa - Extremamente rápida
+        response = await model.generate_content_async(req.mensagem)
         
         return {
             "sucesso": True,
-            "resposta": texto_final
+            "resposta": response.text
         }
     except Exception as e:
-        print(f"🚨 ERRO FATAL DETECTADO: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Erro no Agente de IA: {str(e)}")
-
-@app.post("/api/math/plot")
-async def gerar_coordenadas_grafico(req: PlotRequest):
-    """Gera arrays de coordenadas X e Y para renderização no frontend."""
-    try:
-        x_sym = sp.Symbol(req.variavel)
-        func = sp.sympify(req.expressao)
-        func_num = sp.lambdify(x_sym, func, 'numpy')
-        
-        x_vals = np.linspace(req.x_min, req.x_max, 500)
-        y_vals = func_num(x_vals)
-        
-        # Substitui Infinitos e NaNs para manter o JSON válido
-        y_vals = np.where(np.isnan(y_vals) | np.isinf(y_vals), None, y_vals)
-        
+        print(f"Erro no SDK: {e}")
         return {
-            "sucesso": True,
-            "expressao": req.expressao,
-            "x": x_vals.tolist(),
-            "y": y_vals.tolist()
+            "sucesso": False,
+            "resposta": "🚨 O Núcleo DDX encontrou um erro de processamento. Verifique a chave API."
         }
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Erro ao processar gráfico: {str(e)}")
 
 @app.get("/health")
-def status_check():
-    return {"status": "DDX Neon Core Operacional"}
+def health(): return {"status": "DDX Turbo Online"}
