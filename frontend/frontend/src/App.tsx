@@ -1,19 +1,25 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Background3D from './components/Background3D';
+import AgentChat from './components/AgentChat';
 import { 
-  Menu, ArrowRight, Mouse, Sigma, TrendingUp, Layers, 
-  LineChart, Zap, Brain, BookOpen, Code2, Video, MessageSquare,
+  Menu, ArrowRight, Sigma, TrendingUp, Layers, 
+  LineChart, Zap, BookOpen, Code2, Video, MessageSquare,
   GraduationCap, Terminal, BookMarked, Code, User
 } from 'lucide-react';
 
 export default function App() {
+  // AQUI ESTÁ O ESTADO DO CHAT (SEM ERRO AGORA)
+  const [isChatOpen, setIsChatOpen] = useState(false);
+
   return (
-    // REMOVIDO o bg-[#050505] para revelar o fundo 3D!
     <div className="min-h-screen text-white font-sans overflow-x-hidden relative">
       <Background3D />
+      
+      {/* COMPONENTE DO CHAT SENDO RENDERIZADO AQUI */}
+      <AgentChat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
 
       {/* NAVBAR */}
-      <nav className="fixed top-0 w-full z-50 bg-[#050505]/80 backdrop-blur-md border-b border-white/5">
+      <nav className="fixed top-0 w-full z-40 bg-[#050505]/80 backdrop-blur-md border-b border-white/5">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <span className="text-3xl font-black tracking-tighter">
@@ -21,7 +27,6 @@ export default function App() {
             </span>
             <div className="h-8 w-px bg-white/10" />
             <div className="flex items-center gap-4">
-              {/* CHAMADA DAS IMAGENS AQUI */}
               <img src="/uerj.png" alt="UERJ" className="h-10 object-contain" />
               <img src="/Iprj.png" alt="IPRJ" className="h-10 object-contain" />
             </div>
@@ -49,9 +54,14 @@ export default function App() {
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 mb-20">
-          <button className="px-8 py-4 bg-[#39FF14] text-black font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-[#32e011] transition-all hover:shadow-[0_0_30px_rgba(57,255,20,0.4)]">
+          {/* BOTÃO QUE ABRE O CHAT */}
+          <button 
+            onClick={() => setIsChatOpen(true)}
+            className="px-8 py-4 bg-[#39FF14] text-black font-bold rounded-xl flex items-center justify-center gap-2 hover:bg-[#32e011] transition-all hover:shadow-[0_0_30px_rgba(57,255,20,0.4)]"
+          >
             COMECE AGORA <ArrowRight size={20} />
           </button>
+          
           <button className="px-8 py-4 bg-[#050505]/50 backdrop-blur-md border border-white/10 text-white font-medium rounded-xl hover:bg-white/10 transition-all">
             Ver Documentação
           </button>
@@ -90,7 +100,6 @@ export default function App() {
         </div>
 
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Card 1 */}
           <div className="bg-[#0d110d]/90 backdrop-blur-md border border-green-900/30 rounded-3xl p-8 hover:border-[#39FF14]/50 transition-colors group">
             <div className="w-12 h-12 bg-green-900/40 rounded-xl flex items-center justify-center mb-6">
               <Sigma className="text-[#39FF14]" />
@@ -99,7 +108,6 @@ export default function App() {
             <p className="text-gray-400 leading-relaxed">Suporte para derivadas parciais e implícitas com cálculo simbólico de alta precisão.</p>
           </div>
 
-          {/* Card 2 */}
           <div className="bg-[#110d18]/90 backdrop-blur-md border border-purple-900/30 rounded-3xl p-8 hover:border-purple-500/50 transition-colors">
             <div className="w-12 h-12 bg-purple-900/40 rounded-xl flex items-center justify-center mb-6">
               <TrendingUp className="text-purple-400" />
@@ -108,7 +116,6 @@ export default function App() {
             <p className="text-gray-400 leading-relaxed">Resolução de indeterminações complexas usando a regra de L'Hôpital com explicações detalhadas.</p>
           </div>
 
-          {/* Card 3 */}
           <div className="bg-[#0d110d]/90 backdrop-blur-md border border-green-900/30 rounded-3xl p-8 hover:border-[#39FF14]/50 transition-colors">
             <div className="w-12 h-12 bg-green-900/40 rounded-xl flex items-center justify-center mb-6">
               <Layers className="text-[#39FF14]" />
@@ -117,7 +124,6 @@ export default function App() {
             <p className="text-gray-400 leading-relaxed">Integração simbólica e numérica para cálculo de áreas e volumes em múltiplas dimensões.</p>
           </div>
 
-          {/* Card 4 */}
           <div className="bg-[#110d18]/90 backdrop-blur-md border border-purple-900/30 rounded-3xl p-8 hover:border-purple-500/50 transition-colors">
             <div className="w-12 h-12 bg-purple-900/40 rounded-xl flex items-center justify-center mb-6">
               <LineChart className="text-purple-400" />
@@ -186,7 +192,6 @@ export default function App() {
             <div>
               <p className="text-sm text-gray-400 mb-1">Desenvolvido no</p>
               <div className="flex items-center gap-4 mt-2">
-                {/* CHAMADA DAS IMAGENS NO SOBRE */}
                 <img src="/uerj.png" alt="UERJ" className="h-6 object-contain grayscale hover:grayscale-0 transition-all" />
                 <img src="/Iprj.png" alt="IPRJ" className="h-6 object-contain grayscale hover:grayscale-0 transition-all" />
               </div>
@@ -228,7 +233,6 @@ export default function App() {
             </span>
             <div className="h-8 w-px bg-white/10" />
             <div className="flex items-center gap-4">
-               {/* CHAMADA DAS IMAGENS NO FOOTER */}
                <img src="/uerj.png" alt="UERJ" className="h-8 object-contain opacity-50 hover:opacity-100 transition-opacity" />
                <img src="/Iprj.png" alt="IPRJ" className="h-8 object-contain opacity-50 hover:opacity-100 transition-opacity" />
             </div>
