@@ -1,0 +1,116 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { ArrowLeft, Sparkles } from "lucide-react";
+
+import { CalcTabs } from "@/components/calculator/calc-tabs";
+import { InputPanel } from "@/components/calculator/input-panel";
+import { ResultPanel } from "@/components/calculator/result-panel";
+import { GraphPanel } from "@/components/calculator/graph-panel";
+import { AiPanel } from "@/components/calculator/ai-panel";
+
+export function CalculatorShell() {
+  const [mode, setMode] = useState<"calc1" | "calc2">("calc1");
+  const [expression, setExpression] = useState("x^3 - 3*x + 1");
+  const [selectedOperation, setSelectedOperation] = useState("Estudo de Função");
+  const [variables, setVariables] = useState("x");
+  const [interval, setIntervalValue] = useState("[-10, 10]");
+
+  return (
+    <div className="min-h-screen bg-[radial-gradient(circle_at_20%_10%,rgba(57,255,20,0.12),transparent_18%),radial-gradient(circle_at_80%_18%,rgba(139,92,246,0.12),transparent_18%),linear-gradient(to_bottom,#050505,#040404)] text-white">
+      <header className="sticky top-0 z-40 border-b border-white/5 bg-black/40 backdrop-blur-xl">
+        <div className="container-ddx flex h-20 items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link
+              href="/"
+              className="inline-flex items-center gap-2 rounded-xl border border-white/8 bg-white/[0.03] px-4 py-2 text-sm text-zinc-300 transition hover:bg-white/[0.06] hover:text-white"
+            >
+              <ArrowLeft size={16} />
+              Voltar
+            </Link>
+
+            <div>
+              <div className="text-2xl font-bold tracking-tight">
+                <span className="text-white">D</span>
+                <span className="text-[#39ff14]">D</span>
+                <span className="text-white">X</span>
+              </div>
+              <div className="text-xs text-zinc-500">
+                Interactive Calculus Workspace
+              </div>
+            </div>
+          </div>
+
+          <div className="hidden items-center gap-3 rounded-full border border-white/8 bg-white/[0.03] px-4 py-2 text-sm text-zinc-300 md:flex">
+            <Sparkles size={16} className="text-violet-400" />
+            IA explicativa integrada
+          </div>
+        </div>
+      </header>
+
+      <main className="container-ddx py-10">
+        <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div className="text-sm uppercase tracking-[0.2em] text-zinc-500">
+              Workspace
+            </div>
+            <h1 className="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-white sm:text-5xl">
+              Ferramenta de <span className="text-[#39ff14]">Cálculo</span> com
+              análise, gráfico e explicação
+            </h1>
+            <p className="mt-4 max-w-2xl text-zinc-400">
+              Resolva expressões, visualize curvas, interprete resultados e
+              explore conceitos de Cálculo 1 e Cálculo 2 em uma interface única.
+            </p>
+          </div>
+
+          <CalcTabs
+            value={mode}
+            onChange={(nextMode) => {
+              setMode(nextMode);
+
+              if (nextMode === "calc1") {
+                setExpression("x^3 - 3*x + 1");
+                setSelectedOperation("Estudo de Função");
+                setVariables("x");
+              } else {
+                setExpression("x^2 + y^2 + 2*x*y");
+                setSelectedOperation("Gradiente");
+                setVariables("x, y");
+              }
+            }}
+          />
+        </div>
+
+        <div className="grid gap-6 xl:grid-cols-[380px_1fr]">
+          <InputPanel
+            mode={mode}
+            expression={expression}
+            setExpression={setExpression}
+            selectedOperation={selectedOperation}
+            setSelectedOperation={setSelectedOperation}
+            variables={variables}
+            setVariables={setVariables}
+            interval={interval}
+            setIntervalValue={setIntervalValue}
+          />
+
+          <div className="space-y-6">
+            <ResultPanel
+              mode={mode}
+              expression={expression}
+              selectedOperation={selectedOperation}
+              variables={variables}
+            />
+            <GraphPanel expression={expression} interval={interval} />
+            <AiPanel
+              expression={expression}
+              selectedOperation={selectedOperation}
+            />
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}
