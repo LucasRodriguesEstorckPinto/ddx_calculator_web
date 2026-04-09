@@ -10,6 +10,22 @@ type InputPanelProps = {
   setVariables: (value: string) => void;
   interval: string;
   setIntervalValue: (value: string) => void;
+  onCalculate: () => void;
+  loading: boolean;
+  derivativeOrder: number;
+  setDerivativeOrder: (value: number) => void;
+  limitPoint: string;
+  setLimitPoint: (value: string) => void;
+  limitDirection: string;
+  setLimitDirection: (value: string) => void;
+  partialVariable: string;
+  setPartialVariable: (value: string) => void;
+  isDefiniteIntegral: boolean;
+  setIsDefiniteIntegral: (value: boolean) => void;
+  lowerBound: string;
+  setLowerBound: (value: string) => void;
+  upperBound: string;
+  setUpperBound: (value: string) => void;
 };
 
 const calc1Operations = [
@@ -40,8 +56,28 @@ export function InputPanel({
   setVariables,
   interval,
   setIntervalValue,
+  onCalculate,
+  loading,
+  derivativeOrder,
+  setDerivativeOrder,
+  limitPoint,
+  setLimitPoint,
+  limitDirection,
+  setLimitDirection,
+  partialVariable,
+  setPartialVariable,
+  isDefiniteIntegral,
+  setIsDefiniteIntegral,
+  lowerBound,
+  setLowerBound,
+  upperBound,
+  setUpperBound,
 }: InputPanelProps) {
   const operations = mode === "calc1" ? calc1Operations : calc2Operations;
+  const isLimit = selectedOperation === "Limite";
+  const isDerivative = selectedOperation === "Derivada";
+  const isPartial = selectedOperation === "Derivadas Parciais";
+  const isIntegral = selectedOperation === "Integral";
 
   return (
     <div className="glass rounded-[28px] p-6">
@@ -64,8 +100,8 @@ export function InputPanel({
             onChange={(e) => setExpression(e.target.value)}
             placeholder={
               mode === "calc1"
-                ? "Ex: x^3 - 3*x + 1"
-                : "Ex: x^2 + y^2 + 2*x*y"
+                ? "Ex: x**3 - 3*x + 1"
+                : "Ex: x**2 + y**2 + 2*x*y"
             }
             className="min-h-[120px] w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-4 text-white outline-none transition placeholder:text-zinc-600 focus:border-[#39ff14]/40"
           />
@@ -99,7 +135,7 @@ export function InputPanel({
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label className="mb-2 block text-sm text-zinc-400">
-              Variável principal
+              Variáveis da expressão
             </label>
             <input
               value={variables}
@@ -120,8 +156,127 @@ export function InputPanel({
           </div>
         </div>
 
-        <button className="w-full rounded-2xl bg-[#39ff14] px-5 py-4 text-sm font-semibold text-black transition hover:scale-[1.01]">
-          Calcular agora
+        {isDerivative && (
+          <div>
+            <label className="mb-2 block text-sm text-zinc-400">
+              Ordem da derivada
+            </label>
+            <input
+              type="number"
+              min={1}
+              value={derivativeOrder}
+              onChange={(e) => setDerivativeOrder(Number(e.target.value) || 1)}
+              className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none focus:border-[#39ff14]/40"
+            />
+          </div>
+        )}
+
+        {isIntegral && (
+          <div className="space-y-4 rounded-2xl border border-white/8 bg-white/[0.03] p-4">
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <div className="text-sm text-zinc-400">Tipo de integral</div>
+                <div className="text-xs text-zinc-500">
+                  Escolha entre integral indefinida ou definida
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsDefiniteIntegral(!isDefiniteIntegral)}
+                className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                  isDefiniteIntegral
+                    ? "bg-[#39ff14] text-black"
+                    : "border border-white/10 bg-black/30 text-zinc-300"
+                }`}
+              >
+                {isDefiniteIntegral ? "Definida" : "Indefinida"}
+              </button>
+            </div>
+
+            {isDefiniteIntegral && (
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="mb-2 block text-sm text-zinc-400">
+                    Limite inferior
+                  </label>
+                  <input
+                    value={lowerBound}
+                    onChange={(e) => setLowerBound(e.target.value)}
+                    placeholder="Ex: 0"
+                    className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none focus:border-[#39ff14]/40"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm text-zinc-400">
+                    Limite superior
+                  </label>
+                  <input
+                    value={upperBound}
+                    onChange={(e) => setUpperBound(e.target.value)}
+                    placeholder="Ex: 1, pi, oo"
+                    className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none focus:border-[#39ff14]/40"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {isLimit && (
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="mb-2 block text-sm text-zinc-400">
+                x tende a
+              </label>
+              <input
+                value={limitPoint}
+                onChange={(e) => setLimitPoint(e.target.value)}
+                placeholder="0, 1, pi, oo, -oo"
+                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none focus:border-[#39ff14]/40"
+              />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm text-zinc-400">
+                Direção
+              </label>
+              <select
+                value={limitDirection}
+                onChange={(e) => setLimitDirection(e.target.value)}
+                className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none focus:border-violet-400/40"
+              >
+                <option value="+">Pela direita (+)</option>
+                <option value="-">Pela esquerda (-)</option>
+              </select>
+            </div>
+          </div>
+        )}
+
+        {isPartial && (
+          <div>
+            <label className="mb-2 block text-sm text-zinc-400">
+              Derivar parcialmente em relação a
+            </label>
+            <select
+              value={partialVariable}
+              onChange={(e) => setPartialVariable(e.target.value)}
+              className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-white outline-none focus:border-violet-400/40"
+            >
+              <option value="x">x</option>
+              <option value="y">y</option>
+              <option value="z">z</option>
+            </select>
+          </div>
+        )}
+
+        <button
+          onClick={onCalculate}
+          disabled={loading}
+          className="w-full rounded-2xl bg-[#39ff14] px-5 py-4 text-sm font-semibold text-black transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-70"
+        >
+          {loading ? "Calculando..." : "Calcular agora"}
         </button>
       </div>
     </div>

@@ -9,13 +9,63 @@ import { InputPanel } from "@/components/calculator/input-panel";
 import { ResultPanel } from "@/components/calculator/result-panel";
 import { GraphPanel } from "@/components/calculator/graph-panel";
 import { AiPanel } from "@/components/calculator/ai-panel";
+import { calculateMath } from "@/lib/math-api";
 
 export function CalculatorShell() {
   const [mode, setMode] = useState<"calc1" | "calc2">("calc1");
-  const [expression, setExpression] = useState("x^3 - 3*x + 1");
-  const [selectedOperation, setSelectedOperation] = useState("Estudo de Função");
+  const [expression, setExpression] = useState("x**3 - 3*x + 1");
+  const [selectedOperation, setSelectedOperation] = useState("Derivada");
   const [variables, setVariables] = useState("x");
   const [interval, setIntervalValue] = useState("[-10, 10]");
+  const [result, setResult] = useState("Ainda não calculado");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const [derivativeOrder, setDerivativeOrder] = useState(1);
+  const [limitPoint, setLimitPoint] = useState("0");
+  const [limitDirection, setLimitDirection] = useState("+");
+  const [partialVariable, setPartialVariable] = useState("x");
+
+  const [isDefiniteIntegral, setIsDefiniteIntegral] = useState(false);
+  const [lowerBound, setLowerBound] = useState("0");
+  const [upperBound, setUpperBound] = useState("1");
+
+  async function handleCalculate() {
+    setLoading(true);
+    setError("");
+
+    try {
+      let variable = variables.split(",")[0].trim() || "x";
+
+      if (selectedOperation === "Derivadas Parciais") {
+        variable = partialVariable;
+      }
+
+      const data = await calculateMath({
+        expression,
+        operation: selectedOperation,
+        variable,
+        point: limitPoint,
+        direction: limitDirection,
+        order: derivativeOrder,
+        definite_integral: isDefiniteIntegral,
+        lower_bound: lowerBound,
+        upper_bound: upperBound,
+      });
+
+      if (!data.success) {
+        setError(data.error || "Erro ao calcular");
+        setResult("Falha no cálculo");
+      } else {
+        setResult(data.result);
+      }
+    } catch {
+      setError("Não foi possível conectar ao backend matemático.");
+      setResult("Falha no cálculo");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_20%_10%,rgba(57,255,20,0.12),transparent_18%),radial-gradient(circle_at_80%_18%,rgba(139,92,246,0.12),transparent_18%),linear-gradient(to_bottom,#050505,#040404)] text-white">
@@ -71,14 +121,24 @@ export function CalculatorShell() {
               setMode(nextMode);
 
               if (nextMode === "calc1") {
-                setExpression("x^3 - 3*x + 1");
-                setSelectedOperation("Estudo de Função");
+                setExpression("x**3 - 3*x + 1");
+                setSelectedOperation("Derivada");
                 setVariables("x");
               } else {
-                setExpression("x^2 + y^2 + 2*x*y");
-                setSelectedOperation("Gradiente");
+                setExpression("x**2 + y**2 + 2*x*y");
+                setSelectedOperation("Derivadas Parciais");
                 setVariables("x, y");
               }
+
+              setDerivativeOrder(1);
+              setLimitPoint("0");
+              setLimitDirection("+");
+              setPartialVariable("x");
+              setIsDefiniteIntegral(false);
+              setLowerBound("0");
+              setUpperBound("1");
+              setResult("Ainda não calculado");
+              setError("");
             }}
           />
         </div>
@@ -94,6 +154,22 @@ export function CalculatorShell() {
             setVariables={setVariables}
             interval={interval}
             setIntervalValue={setIntervalValue}
+            onCalculate={handleCalculate}
+            loading={loading}
+            derivativeOrder={derivativeOrder}
+            setDerivativeOrder={setDerivativeOrder}
+            limitPoint={limitPoint}
+            setLimitPoint={setLimitPoint}
+            limitDirection={limitDirection}
+            setLimitDirection={setLimitDirection}
+            partialVariable={partialVariable}
+            setPartialVariable={setPartialVariable}
+            isDefiniteIntegral={isDefiniteIntegral}
+            setIsDefiniteIntegral={setIsDefiniteIntegral}
+            lowerBound={lowerBound}
+            setLowerBound={setLowerBound}
+            upperBound={upperBound}
+            setUpperBound={setUpperBound}
           />
 
           <div className="space-y-6">
@@ -101,7 +177,13 @@ export function CalculatorShell() {
               mode={mode}
               expression={expression}
               selectedOperation={selectedOperation}
-              variables={variables}
+              variables={
+                selectedOperation === "Derivadas Parciais"
+                  ? partialVariable
+                  : variables
+              }
+              computedResult={result}
+              error={error}
             />
             <GraphPanel expression={expression} interval={interval} />
             <AiPanel
