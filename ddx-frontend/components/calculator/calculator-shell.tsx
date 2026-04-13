@@ -11,6 +11,25 @@ import { GraphPanel } from "@/components/calculator/graph-panel";
 import { AiPanel } from "@/components/calculator/ai-panel";
 import { calculateMath } from "@/lib/math-api";
 
+type AnalysisResult = {
+  mode_message?: string;
+  domain?: string;
+  domain_intervals?: string[];
+  first_derivative?: string;
+  second_derivative?: string;
+  critical_points?: string[];
+  stationary_points?: string[];
+  inflection_candidates?: string[];
+  singularities?: string[];
+  increasing_intervals?: string[];
+  decreasing_intervals?: string[];
+  concave_up_intervals?: string[];
+  concave_down_intervals?: string[];
+  local_maxima?: string[];
+  local_minima?: string[];
+  vertical_asymptotes?: string[];
+} | null;
+
 export function CalculatorShell() {
   const [mode, setMode] = useState<"calc1" | "calc2">("calc1");
   const [expression, setExpression] = useState("x**3 - 3*x + 1");
@@ -20,11 +39,13 @@ export function CalculatorShell() {
   const [result, setResult] = useState("Ainda não calculado");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [analysis, setAnalysis] = useState<AnalysisResult>(null);
 
   const [derivativeOrder, setDerivativeOrder] = useState(1);
   const [limitPoint, setLimitPoint] = useState("0");
   const [limitDirection, setLimitDirection] = useState("+");
   const [partialVariable, setPartialVariable] = useState("x");
+  const [tangentPoint, setTangentPoint] = useState("0");
 
   const [isDefiniteIntegral, setIsDefiniteIntegral] = useState(false);
   const [lowerBound, setLowerBound] = useState("0");
@@ -33,6 +54,7 @@ export function CalculatorShell() {
   async function handleCalculate() {
     setLoading(true);
     setError("");
+    setAnalysis(null);
 
     try {
       let variable = variables.split(",")[0].trim() || "x";
@@ -56,12 +78,29 @@ export function CalculatorShell() {
       if (!data.success) {
         setError(data.error || "Erro ao calcular");
         setResult("Falha no cálculo");
+        setAnalysis(null);
       } else {
-        setResult(data.result);
+        setResult(data.result || "Calculado");
+        setAnalysis(data.analysis || null);
       }
-    } catch {
-      setError("Não foi possível conectar ao backend matemático.");
+    } catch (err) {
+      if (err instanceof Error) {
+        if (err.message === "TIMEOUT") {
+          setError("O backend demorou demais para responder.");
+        } else if (err.message.startsWith("HTTP_")) {
+          setError(`Erro do servidor: ${err.message.replace("HTTP_", "")}`);
+        } else if (err.message.startsWith("INVALID_JSON:")) {
+          setError("O backend respondeu, mas o JSON veio inválido.");
+          console.error(err.message);
+        } else {
+          setError("Não foi possível conectar ao backend matemático.");
+        }
+      } else {
+        setError("Não foi possível conectar ao backend matemático.");
+      }
+
       setResult("Falha no cálculo");
+      setAnalysis(null);
     } finally {
       setLoading(false);
     }
@@ -134,11 +173,13 @@ export function CalculatorShell() {
               setLimitPoint("0");
               setLimitDirection("+");
               setPartialVariable("x");
+              setTangentPoint("0");
               setIsDefiniteIntegral(false);
               setLowerBound("0");
               setUpperBound("1");
               setResult("Ainda não calculado");
               setError("");
+              setAnalysis(null);
             }}
           />
         </div>
@@ -164,6 +205,8 @@ export function CalculatorShell() {
             setLimitDirection={setLimitDirection}
             partialVariable={partialVariable}
             setPartialVariable={setPartialVariable}
+            tangentPoint={tangentPoint}
+            setTangentPoint={setTangentPoint}
             isDefiniteIntegral={isDefiniteIntegral}
             setIsDefiniteIntegral={setIsDefiniteIntegral}
             lowerBound={lowerBound}
@@ -184,8 +227,15 @@ export function CalculatorShell() {
               }
               computedResult={result}
               error={error}
+              analysis={analysis}
             />
-            <GraphPanel expression={expression} interval={interval} />
+            <GraphPanel
+              expression={expression}
+              interval={interval}
+              analysis={analysis}
+              selectedOperation={selectedOperation}
+              tangentPoint={tangentPoint}
+            />
             <AiPanel
               expression={expression}
               selectedOperation={selectedOperation}
