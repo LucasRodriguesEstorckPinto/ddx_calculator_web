@@ -26,9 +26,12 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   });
 }
 
+const API_BASE =
+  process.env.NEXT_PUBLIC_MATH_API_URL ?? "http://127.0.0.1:8000";
+
 export async function calculateMath(payload: CalculatePayload) {
   const response = await withTimeout(
-    fetch("http://127.0.0.1:8000/calculate", {
+    fetch(`${API_BASE}/calculate`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -38,11 +41,11 @@ export async function calculateMath(payload: CalculatePayload) {
     10000
   );
 
-  if (!response.ok) {
-    throw new Error(`HTTP_${response.status}`);
-  }
-
   const text = await withTimeout(response.text(), 10000);
+
+  if (!response.ok) {
+    throw new Error(`HTTP_${response.status}: ${text.slice(0, 300)}`);
+  }
 
   try {
     return JSON.parse(text);
