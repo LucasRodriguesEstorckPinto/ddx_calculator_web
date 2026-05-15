@@ -5,6 +5,7 @@ export async function POST(req: NextRequest) {
     const { prompt, expression, operation, result } = await req.json();
 
     const apiKey = process.env.GEMINI_API_KEY;
+
     if (!apiKey) {
       return NextResponse.json(
         { error: "GEMINI_API_KEY não configurada." },
@@ -12,20 +13,35 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const userPrompt = `
-Você é o assistente do DDX.
-Explique de forma clara e objetiva.
+    const finalPrompt = `
+Você é o assistente do DDX, uma interface de matemática computacional.
+Responda em português do Brasil, com clareza, objetividade e linguagem didática.
 
-Expressão: ${expression ?? ""}
-Operação: ${operation ?? ""}
-Resultado: ${JSON.stringify(result ?? {}, null, 2)}
+FORMATAÇÃO OBRIGATÓRIA:
+- Use LaTeX para toda expressão matemática.
+- Use \\( ... \\) para matemática inline.
+- Use \\[ ... \\] para equações em destaque.
+- Não use blocos de código para fórmulas.
+- Não escreva \`x**2\` nem \`3*x - 3\` em texto puro se for uma expressão matemática; converta para LaTeX.
+- Não mostre o JSON bruto de entrada.
+- Não repita o resultado em listas desnecessárias.
 
-Pergunta do usuário:
-${prompt ?? "Explique o resultado e o conceito envolvido."}
-    `.trim();
+Contexto:
+- Expressão: ${expression ?? ""}
+- Operação: ${operation ?? ""}
+- Resultado estruturado: ${JSON.stringify(result ?? {}, null, 2)}
+
+Tarefa:
+${prompt ?? "Explique o resultado, o conceito envolvido e a interpretação matemática."}
+
+Formato ideal:
+1. Resposta curta e direta.
+2. Fórmula em LaTeX.
+3. Explicação intuitiva.
+`.trim();
 
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
       {
         method: "POST",
         headers: {
@@ -35,7 +51,7 @@ ${prompt ?? "Explique o resultado e o conceito envolvido."}
         body: JSON.stringify({
           contents: [
             {
-              parts: [{ text: userPrompt }],
+              parts: [{ text: finalPrompt }],
             },
           ],
         }),
@@ -52,13 +68,18 @@ ${prompt ?? "Explique o resultado e o conceito envolvido."}
     }
 
     const text =
-      data?.candidates?.[0]?.content?.parts?.map((p: { text?: string }) => p.text ?? "").join("\n") ??
-      "Sem resposta do modelo.";
+      data?.candidates?.[0]?.content?.parts
+        ?.map((part: { text?: string }) => part.text ?? "")
+        .join("\n")
+        .trim() || "Sem resposta do Gemini.";
 
     return NextResponse.json({ text });
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Erro interno." },
+      {
+        error:
+          error instanceof Error ? error.message : "Erro interno no servidor.",
+      },
       { status: 500 }
     );
   }

@@ -27,7 +27,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 }
 
 const API_BASE =
-  process.env.NEXT_PUBLIC_MATH_API_URL ?? "http://127.0.0.1:8000";
+  process.env.NEXT_PUBLIC_MATH_API_URL?.trim() || "http://127.0.0.1:8000";
 
 export async function calculateMath(payload: CalculatePayload) {
   const response = await withTimeout(

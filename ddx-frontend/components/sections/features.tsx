@@ -37,7 +37,7 @@ const features = [
     icon: BarChart3,
     title: "Visualização de Dados",
     description:
-      "Gráficos 3D e 2D interativos com interpolação customizada e animações suaves.",
+      "Gráficos interativos com interpolação customizada e animações suaves.",
     tone: "purple" as const,
   },
   {

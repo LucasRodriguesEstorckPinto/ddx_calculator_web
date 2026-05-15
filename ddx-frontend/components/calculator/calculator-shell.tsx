@@ -126,7 +126,7 @@ export function CalculatorShell() {
                 <span className="text-white">X</span>
               </div>
               <div className="text-xs text-zinc-500">
-                Interactive Calculus Workspace
+                Interactive Math Workspace
               </div>
             </div>
           </div>
@@ -145,12 +145,12 @@ export function CalculatorShell() {
               Workspace
             </div>
             <h1 className="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-white sm:text-5xl">
-              Ferramenta de <span className="text-[#39ff14]">Cálculo</span> com
-              análise, gráfico e explicação
+              Ferramenta de <span className="text-[#39ff14]">matemática</span>{" "}
+              com análise, gráfico e explicação
             </h1>
             <p className="mt-4 max-w-2xl text-zinc-400">
-              Resolva expressões, visualize curvas, interprete resultados e
-              explore conceitos de Cálculo 1 e Cálculo 2 em uma interface única.
+              Resolva expressões, visualize estruturas, interprete resultados e
+              explore ideias matemáticas em uma interface única.
             </p>
           </div>
 
@@ -239,6 +239,12 @@ export function CalculatorShell() {
             <AiPanel
               expression={expression}
               selectedOperation={selectedOperation}
+              result={{
+                computedResult: result,
+                analysis,
+                error,
+                mode,
+              }}
             />
           </div>
         </div>

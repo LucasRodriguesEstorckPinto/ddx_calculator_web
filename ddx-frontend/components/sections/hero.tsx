@@ -31,12 +31,12 @@ export function Hero() {
         <h1 className="max-w-5xl text-5xl font-bold leading-none tracking-tight sm:text-6xl lg:text-8xl">
           <span className="text-gradient">DDX:</span> A Evolução do
           <br />
-          Cálculo Multivariável
+          Cálculo Diferencial
         </h1>
 
         <p className="mt-8 max-w-3xl text-base leading-8 text-zinc-400 sm:text-lg">
           Potencializando a análise matemática com SymPy e algoritmos de
-          engenharia. <span className="text-[#39ff14]">Agora pronto para Cálculo 2.</span>
+          engenharia. <span className="text-[#39ff14]">Agora pronto para Cálculo.</span>
         </p>
 
         <div className="mt-10 flex flex-col gap-4 sm:flex-row">
