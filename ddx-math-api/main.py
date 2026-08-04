@@ -1,12 +1,14 @@
+import json
+import math
+from typing import Optional, Any
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from sympy import S, Eq, Symbol, diff, integrate, limit, simplify, solveset, sympify
+from sympy import S, Eq, Symbol, diff, integrate, limit, simplify, solveset, sympify, Matrix
 from sympy.calculus.singularities import singularities
 from sympy.core.sympify import SympifyError
 from sympy.printing.str import sstr
-from typing import Optional, Any
-import math
 
 app = FastAPI(title="DDX Math API")
 
@@ -23,8 +25,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 class CalculateRequest(BaseModel):
+    mode: Optional[str] = "calc1" # Novo campo para o roteamento
     expression: str
     operation: str
     variable: Optional[str] = "x"
@@ -35,13 +37,11 @@ class CalculateRequest(BaseModel):
     lower_bound: Optional[str] = None
     upper_bound: Optional[str] = None
 
-
 def to_text(value: Any) -> str:
     try:
         return sstr(value)
     except Exception:
         return str(value)
-
 
 def normalize_set_output(value: Any) -> list[str]:
     if value is None:
@@ -63,7 +63,6 @@ def normalize_set_output(value: Any) -> list[str]:
         pass
     return [to_text(value)]
 
-
 def normalize_interval_set(value: Any) -> list[str]:
     if value is None:
         return []
@@ -79,7 +78,6 @@ def normalize_interval_set(value: Any) -> list[str]:
             return [to_text(value)]
     return [to_text(value)]
 
-
 def safe_real_number(expr: Any) -> Optional[float]:
     try:
         n = complex(expr.evalf())
@@ -89,14 +87,12 @@ def safe_real_number(expr: Any) -> Optional[float]:
     except Exception:
         return None
 
-
 def try_build_point(func_expr, symbol: Symbol, x_value_expr) -> Optional[str]:
     try:
         y_expr = simplify(func_expr.subs(symbol, x_value_expr))
         return f"({to_text(x_value_expr)}, {to_text(y_expr)})"
     except Exception:
         return None
-
 
 def analyze_function(expr, x: Symbol) -> dict:
     f1 = simplify(diff(expr, x))
@@ -187,19 +183,85 @@ def analyze_function(expr, x: Symbol) -> dict:
 
     return analysis
 
-
 @app.get("/")
 def root():
     return {"message": "DDX Math API online"}
 
-
 @app.post("/calculate")
 async def calculate(request: CalculateRequest):
     try:
+        mode = request.mode
+        operation = (request.operation or "").strip()
+
+        # ==========================================
+        # ROTEAMENTO PARA ÁLGEBRA LINEAR
+        # ==========================================
+        if mode == "alglin":
+            try:
+                # Transforma a string JSON (ex: [["1", "2"], ["3", "4"]]) em lista de listas
+                raw_matrix = json.loads(request.expression)
+            except json.JSONDecodeError:
+                return {"success": False, "result": "", "error": "Formato de matriz inválido. Certifique-se de preencher a grade corretamente.", "analysis": None}
+            
+            parsed_matrix = []
+            for row in raw_matrix:
+                parsed_row = []
+                for cell in row:
+                    val = cell.strip()
+                    # Células vazias são tratadas como zero
+                    if not val:
+                        parsed_row.append(S.Zero)
+                    else:
+                        parsed_row.append(sympify(val))
+                parsed_matrix.append(parsed_row)
+            
+            M = Matrix(parsed_matrix)
+            
+            if operation == "Determinante":
+                if not M.is_square:
+                    return {"success": False, "result": "", "error": "A matriz precisa ser quadrada para calcular o determinante.", "analysis": None}
+                return {"success": True, "result": to_text(simplify(M.det())), "error": "", "analysis": None}
+            
+            if operation == "Matriz Inversa":
+                if not M.is_square:
+                    return {"success": False, "result": "", "error": "A matriz precisa ser quadrada para possuir inversa.", "analysis": None}
+                if M.det() == 0:
+                    return {"success": False, "result": "", "error": "A matriz não é invertível (determinante = 0).", "analysis": None}
+                return {"success": True, "result": to_text(simplify(M.inv())), "error": "", "analysis": None}
+                
+            if operation == "Escalonamento":
+                # rref() retorna a matriz escalonada reduzida e os índices dos pivôs
+                res, pivots = M.rref()
+                return {"success": True, "result": to_text(res), "error": "", "analysis": None}
+                
+            if operation == "Autovalores e Autovetores":
+                if not M.is_square:
+                    return {"success": False, "result": "", "error": "A matriz precisa ser quadrada.", "analysis": None}
+                
+                # eigenvects retorna uma lista de tuplas: (autovalor, multiplicidade, [autovetores])
+                res = M.eigenvects()
+                out_str = ""
+                for evalue, mult, evects in res:
+                    out_str += f"Autovalor: {to_text(evalue)} (Multiplicidade Algébrica: {mult})\n"
+                    out_str += "Autovetor(es) base:\n"
+                    for v in evects:
+                        out_str += f"{to_text(v)}\n"
+                    out_str += "\n"
+                return {"success": True, "result": out_str.strip(), "error": "", "analysis": None}
+                
+            if operation == "Sistema Linear":
+                # Tratamos a grade como uma matriz ampliada [A | b] e escalonamos
+                res, pivots = M.rref()
+                return {"success": True, "result": f"Matriz Ampliada Escalonada Reduzida (RREF):\n{to_text(res)}", "error": "", "analysis": None}
+
+            return {"success": False, "result": "", "error": f"Operação não suportada em Álgebra Linear: {operation}", "analysis": None}
+
+        # ==========================================
+        # ROTEAMENTO PARA CÁLCULO 1 e 2
+        # ==========================================
         variable_name = (request.variable or "x").strip() or "x"
         variable_symbol = Symbol(variable_name)
         expr = sympify(request.expression)
-        operation = (request.operation or "").strip()
 
         if operation == "Derivada":
             order = request.order or 1
@@ -209,7 +271,7 @@ async def calculate(request: CalculateRequest):
         if operation == "Integral":
             if request.definite_integral:
                 if request.lower_bound is None or request.upper_bound is None:
-                    return {"success": False, "result": "", "error": "Limites inferior e superior são obrigatórios para integral definida.", "analysis": None}
+                    return {"success": False, "result": "", "error": "Limites inferior e superior são obrigatórios.", "analysis": None}
                 lower = sympify(request.lower_bound)
                 upper = sympify(request.upper_bound)
                 result_expr = simplify(integrate(expr, (variable_symbol, lower, upper)))
@@ -238,12 +300,12 @@ async def calculate(request: CalculateRequest):
             if len(free_symbols) == 0:
                 return {"success": True, "result": to_text(expr), "error": "", "analysis": {"mode_message": "Expressão constante no domínio real.", "domain": "Reais", "domain_intervals": ["Reals"], "first_derivative": "0", "second_derivative": "0", "critical_points": [], "stationary_points": [], "inflection_candidates": [], "singularities": [], "increasing_intervals": [], "decreasing_intervals": [], "concave_up_intervals": [], "concave_down_intervals": [], "local_maxima": [], "local_minima": [], "vertical_asymptotes": []}}
             if len(free_symbols) > 1:
-                return {"success": False, "result": "", "error": "Estudo de função v1 suporta apenas funções reais de uma variável.", "analysis": None}
+                return {"success": False, "result": "", "error": "Estudo de função suporta apenas funções reais de uma variável.", "analysis": None}
             x = free_symbols[0]
             analysis = analyze_function(expr, x)
             return {"success": True, "result": "Estudo de função concluído.", "error": "", "analysis": analysis}
 
-        return {"success": False, "result": "", "error": f"Operação não suportada: {operation}", "analysis": None}
+        return {"success": False, "result": "", "error": f"Operação de Cálculo não suportada: {operation}", "analysis": None}
 
     except SympifyError:
         return {"success": False, "result": "", "error": "Não foi possível interpretar a expressão matemática.", "analysis": None}

@@ -1,5 +1,6 @@
 export type CalculatePayload = {
-  expression: string;
+  mode: "alglin" | "calc1" | "calc2"; // Adicionado para o roteamento no backend
+  expression: string; // Para Álgebra Linear, receberá a matriz como string JSON
   operation: string;
   variable?: string;
   point?: string;
@@ -38,7 +39,7 @@ export async function calculateMath(payload: CalculatePayload) {
       },
       body: JSON.stringify(payload),
     }),
-    10000
+    10000 // 10 segundos de timeout
   );
 
   const text = await withTimeout(response.text(), 10000);

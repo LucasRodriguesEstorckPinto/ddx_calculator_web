@@ -2,7 +2,7 @@ import {
   Sigma,
   TrendingUp,
   Layers3,
-  BarChart3,
+  Grid3X3,
   Zap,
   Brain,
 } from "lucide-react";
@@ -13,45 +13,45 @@ import { SectionBadge } from "@/components/ui/section-badge";
 
 const features = [
   {
-    icon: Sigma,
-    title: "Derivação Avançada",
+    icon: Grid3X3,
+    title: "Matrizes e Sistemas",
     description:
-      "Suporte para derivadas parciais e implícitas com cálculo simbólico de alta precisão.",
+      "Resolução de sistemas lineares, cálculo de determinantes e inversão de matrizes em tempo real.",
     tone: "green" as const,
-  },
-  {
-    icon: TrendingUp,
-    title: "Limites Passo-a-Passo",
-    description:
-      "Resolução de indeterminações complexas usando a regra de L’Hôpital com explicações detalhadas.",
-    tone: "purple" as const,
   },
   {
     icon: Layers3,
-    title: "Integrais Múltiplas",
+    title: "Escalonamento Reduzido",
     description:
-      "Integração simbólica e numérica para cálculo de áreas e volumes em múltiplas dimensões.",
+      "Algoritmos otimizados para redução de matrizes (RREF) e análise de postos passo-a-passo.",
+    tone: "purple" as const,
+  },
+  {
+    icon: TrendingUp,
+    title: "Autovalores e Autovetores",
+    description:
+      "Decomposição espectral e análise de transformações lineares com precisão simbólica.",
     tone: "green" as const,
   },
   {
-    icon: BarChart3,
-    title: "Visualização de Dados",
+    icon: Sigma,
+    title: "Cálculo Simbólico",
     description:
-      "Gráficos interativos com interpolação customizada e animações suaves.",
+      "Suporte absoluto para derivadas parciais, integrais múltiplas e limites complexos.",
     tone: "purple" as const,
   },
   {
     icon: Zap,
     title: "Performance Otimizada",
     description:
-      "Algoritmos otimizados para cálculos rápidos mesmo com funções complexas.",
+      "Algoritmos em Python projetados para cálculos super-rápidos, mesmo com entradas massivas.",
     tone: "green" as const,
   },
   {
     icon: Brain,
     title: "IA Assistente",
     description:
-      "Sugestões inteligentes e correções automáticas para expressões matemáticas.",
+      "Tutor inteligente integrado para explicar resultados e demonstrar conceitos matriciais.",
     tone: "purple" as const,
   },
 ];

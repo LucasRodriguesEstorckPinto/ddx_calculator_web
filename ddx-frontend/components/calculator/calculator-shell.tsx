@@ -31,10 +31,16 @@ type AnalysisResult = {
 } | null;
 
 export function CalculatorShell() {
-  const [mode, setMode] = useState<"calc1" | "calc2">("calc1");
-  const [expression, setExpression] = useState("x**3 - 3*x + 1");
-  const [selectedOperation, setSelectedOperation] = useState("Derivada");
-  const [variables, setVariables] = useState("x");
+  // Define a Álgebra Linear como o modo inicial padrão
+  const [mode, setMode] = useState<"alglin" | "calc1" | "calc2">("alglin");
+  
+  // O estado inicial da expressão para alglin será uma matriz 3x3 vazia em JSON
+  const [expression, setExpression] = useState(
+    JSON.stringify([["", "", ""], ["", "", ""], ["", "", ""]])
+  );
+  const [selectedOperation, setSelectedOperation] = useState("Escalonamento");
+  const [variables, setVariables] = useState("");
+  
   const [interval, setIntervalValue] = useState("[-10, 10]");
   const [result, setResult] = useState("Ainda não calculado");
   const [loading, setLoading] = useState(false);
@@ -63,7 +69,9 @@ export function CalculatorShell() {
         variable = partialVariable;
       }
 
+      // Agora enviamos o 'mode' no payload para o backend rotear corretamente
       const data = await calculateMath({
+        mode,
         expression,
         operation: selectedOperation,
         variable,
@@ -107,7 +115,8 @@ export function CalculatorShell() {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_20%_10%,rgba(57,255,20,0.12),transparent_18%),radial-gradient(circle_at_80%_18%,rgba(139,92,246,0.12),transparent_18%),linear-gradient(to_bottom,#050505,#040404)] text-white">
+    
+    <div className="min-h-screen bg-[radial-gradient(circle_at_20%_10%,rgba(57,255,20,0.12),transparent_18%),radial-gradient(circle_at_50%_50%,rgba(57,255,20,0.10),transparent_18%),radial-gradient(circle_at_80%_18%,rgba(139,92,246,0.12),transparent_18%),linear-gradient(to_bottom,#050505,#040404)] text-white">
       <header className="sticky top-0 z-40 border-b border-white/5 bg-black/40 backdrop-blur-xl">
         <div className="container-ddx flex h-20 items-center justify-between">
           <div className="flex items-center gap-4">
@@ -132,7 +141,7 @@ export function CalculatorShell() {
           </div>
 
           <div className="hidden items-center gap-3 rounded-full border border-white/8 bg-white/[0.03] px-4 py-2 text-sm text-zinc-300 md:flex">
-            <Sparkles size={16} className="text-violet-400" />
+            <Sparkles size={16} className="text-[#39ff14]" />
             IA explicativa integrada
           </div>
         </div>
@@ -149,8 +158,8 @@ export function CalculatorShell() {
               com análise, gráfico e explicação
             </h1>
             <p className="mt-4 max-w-2xl text-zinc-400">
-              Resolva expressões, visualize estruturas, interprete resultados e
-              explore ideias matemáticas em uma interface única.
+              Resolva matrizes, visualize transformações lineares, interprete resultados e
+              explore o cálculo em uma interface única.
             </p>
           </div>
 
@@ -159,7 +168,11 @@ export function CalculatorShell() {
             onChange={(nextMode) => {
               setMode(nextMode);
 
-              if (nextMode === "calc1") {
+              if (nextMode === "alglin") {
+                setExpression(JSON.stringify([["", "", ""], ["", "", ""], ["", "", ""]]));
+                setSelectedOperation("Escalonamento");
+                setVariables("");
+              } else if (nextMode === "calc1") {
                 setExpression("x**3 - 3*x + 1");
                 setSelectedOperation("Derivada");
                 setVariables("x");
@@ -229,13 +242,19 @@ export function CalculatorShell() {
               error={error}
               analysis={analysis}
             />
-            <GraphPanel
-              expression={expression}
-              interval={interval}
-              analysis={analysis}
-              selectedOperation={selectedOperation}
-              tangentPoint={tangentPoint}
-            />
+            
+            {/* Ocultei o GraphPanel para alglin momentaneamente. 
+                Pode ser reativado quando a visualização 3D de vetores estiver pronta. */}
+            {mode !== "alglin" && (
+              <GraphPanel
+                expression={expression}
+                interval={interval}
+                analysis={analysis}
+                selectedOperation={selectedOperation}
+                tangentPoint={tangentPoint}
+              />
+            )}
+            
             <AiPanel
               expression={expression}
               selectedOperation={selectedOperation}
