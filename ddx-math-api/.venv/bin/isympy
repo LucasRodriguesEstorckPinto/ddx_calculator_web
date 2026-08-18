@@ -1,4 +1,4 @@
-#!/Users/lucas/Documents/GitHub/ddx_calculator_web/ddx-math-api/.venv/bin/python3.12
+#!/home/lucas/Documentos/GitHub/ddx_calculator_web/ddx-math-api/.venv/bin/python3
 # -*- coding: utf-8 -*-
 import re
 import sys
