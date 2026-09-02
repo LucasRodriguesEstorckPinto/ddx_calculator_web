@@ -5,7 +5,7 @@ from typing import Optional, Any
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from sympy import S, Eq, Symbol, diff, integrate, limit, simplify, solveset, sympify, Matrix
+from sympy import S, Eq, Symbol, diff, integrate, limit, simplify, solveset, sympify, Matrix, interpolate, oo, summation
 from sympy.calculus.singularities import singularities
 from sympy.core.sympify import SympifyError
 from sympy.printing.str import sstr
@@ -36,6 +36,7 @@ class CalculateRequest(BaseModel):
     definite_integral: Optional[bool] = False
     lower_bound: Optional[str] = None
     upper_bound: Optional[str] = None
+    num_terms: Optional[int] = 5 # Quantidade de termos a exibir para sequências/séries
 
 def to_text(value: Any) -> str:
     try:
@@ -183,6 +184,161 @@ def analyze_function(expr, x: Symbol) -> dict:
 
     return analysis
 
+# Deduz a fórmula do termo geral caso a entrada seja uma lista numérica
+def infer_general_term(terms, n_symbol: Symbol):
+    if not terms or len(terms) < 2:
+        return None
+
+    # Tenta PA (Diferença constante)
+    try:
+        diffs = [terms[i+1] - terms[i] for i in range(len(terms)-1)]
+        if all(simplify(d - diffs[0]) == 0 for d in diffs):
+            d = diffs[0]
+            a1 = terms[0]
+            return simplify(a1 + (n_symbol - 1) * d)
+    except Exception:
+        pass
+
+    # Tenta PG (Razão constante)
+    try:
+        if all(t != 0 for t in terms):
+            ratios = [terms[i+1] / terms[i] for i in range(len(terms)-1)]
+            if all(simplify(r - ratios[0]) == 0 for r in ratios):
+                q = ratios[0]
+                a1 = terms[0]
+                return simplify(a1 * (q ** (n_symbol - 1)))
+    except Exception:
+        pass
+
+    # Tenta Interpolação Polinomial de Lagrange
+    try:
+        x_vals = list(range(1, len(terms) + 1))
+        poly_expr = simplify(interpolate(list(zip(x_vals, terms)), n_symbol))
+        
+        is_poly_correct = True
+        for idx, term in enumerate(terms, start=1):
+            if simplify(poly_expr.subs(n_symbol, idx) - term) != 0:
+                is_poly_correct = False
+                break
+                
+        if is_poly_correct:
+            return poly_expr
+    except Exception:
+        pass
+
+    return None
+
+# Analisa a convergência e gera os primeiros termos de uma sequência
+def analyze_sequence(expr_or_terms, n_symbol: Symbol, num_terms: int = 5) -> dict:
+    inferred = False
+    
+    if isinstance(expr_or_terms, (list, tuple)):
+        inferred_expr = infer_general_term(expr_or_terms, n_symbol)
+        if inferred_expr is None:
+            return {
+                "error": "Não foi possível deduzir um padrão (PA, PG ou Polinomial) para os termos fornecidos."
+            }
+        expr = inferred_expr
+        inferred = True
+    else:
+        raw_expr = expr_or_terms
+        free_syms = list(raw_expr.free_symbols)
+        if free_syms:
+            expr = raw_expr.subs(free_syms[0], n_symbol)
+        else:
+            expr = raw_expr
+
+    lim_val = simplify(limit(expr, n_symbol, oo))
+    lim_text = to_text(lim_val)
+    
+    is_convergent = False
+    if lim_val not in (oo, -oo, S.ComplexInfinity) and not lim_val.has(Symbol):
+        is_convergent = True
+
+    first_terms = []
+    for k in range(1, num_terms + 1):
+        try:
+            val = simplify(expr.subs(n_symbol, k))
+            first_terms.append(f"a_{k} = {to_text(val)}")
+        except Exception:
+            first_terms.append(f"a_{k} = Indefinido")
+
+    return {
+        "general_expression": to_text(expr),
+        "inferred_from_list": inferred,
+        "limit_infinity": lim_text,
+        "is_convergent": is_convergent,
+        "status_message": f"A sequência {'converge para ' + lim_text if is_convergent else 'diverge'}." if lim_val not in (oo, -oo, S.ComplexInfinity) else "A sequência diverge.",
+        "first_terms": first_terms
+    }
+
+# Analisa a convergência, aplica o Teste do Termo Geral e calcula a soma de uma série infinita
+def analyze_series(expr_or_terms, n_symbol: Symbol, num_terms: int = 5) -> dict:
+    inferred = False
+    
+    if isinstance(expr_or_terms, (list, tuple)):
+        inferred_expr = infer_general_term(expr_or_terms, n_symbol)
+        if inferred_expr is None:
+            return {
+                "error": "Não foi possível deduzir um termo geral para os termos da série."
+            }
+        expr = inferred_expr
+        inferred = True
+    else:
+        raw_expr = expr_or_terms
+        free_syms = list(raw_expr.free_symbols)
+        if free_syms:
+            expr = raw_expr.subs(free_syms[0], n_symbol)
+        else:
+            expr = raw_expr
+
+    lim_an = simplify(limit(expr, n_symbol, oo))
+    lim_an_text = to_text(lim_an)
+
+    try:
+        series_sum = simplify(summation(expr, (n_symbol, 1, oo)))
+    except Exception:
+        series_sum = S.ComplexInfinity
+
+    sum_text = to_text(series_sum)
+
+    test_used = "Análise da Soma / Testes da Série"
+    is_convergent = False
+
+    if lim_an != 0:
+        is_convergent = False
+        test_used = "Teste do Termo Geral (lim a_n ≠ 0)"
+        status_message = f"A série DIVERGE pelo Teste do Termo Geral, pois lim(a_n) = {lim_an_text} ≠ 0."
+    elif series_sum not in (oo, -oo, S.ComplexInfinity) and not series_sum.has(Symbol):
+        is_convergent = True
+        status_message = f"A série CONVERGE e sua soma é S = {sum_text}."
+    elif series_sum in (oo, -oo):
+        is_convergent = False
+        status_message = f"A série DIVERGE (Soma S = {sum_text})."
+    else:
+        status_message = f"Não foi possível determinar a soma exata. O limite do termo geral é {lim_an_text}."
+
+    first_terms = []
+    partial_sum = 0
+    for k in range(1, num_terms + 1):
+        try:
+            val = simplify(expr.subs(n_symbol, k))
+            partial_sum = simplify(partial_sum + val)
+            first_terms.append(f"a_{k} = {to_text(val)} (S_{k} = {to_text(partial_sum)})")
+        except Exception:
+            first_terms.append(f"a_{k} = Indefinido")
+
+    return {
+        "general_expression": to_text(expr),
+        "inferred_from_list": inferred,
+        "limit_term_general": lim_an_text,
+        "series_sum": sum_text,
+        "is_convergent": is_convergent,
+        "test_used": test_used,
+        "status_message": status_message,
+        "first_terms": first_terms
+    }
+
 @app.get("/")
 def root():
     return {"message": "DDX Math API online"}
@@ -255,6 +411,48 @@ async def calculate(request: CalculateRequest):
                 return {"success": True, "result": f"Matriz Ampliada Escalonada Reduzida (RREF):\n{to_text(res)}", "error": "", "analysis": None}
 
             return {"success": False, "result": "", "error": f"Operação não suportada em Álgebra Linear: {operation}", "analysis": None}
+
+        # ==========================================
+        # ROTEAMENTO PARA SEQUÊNCIAS E SÉRIES
+        # (Usa símbolo restrito: positive=True, integer=True)
+        # ==========================================
+        if operation in ("Sequências", "Séries"):
+            variable_name = (request.variable or "n").strip() or "n"
+            seq_symbol = Symbol(variable_name, positive=True, integer=True)
+            num_terms = request.num_terms if request.num_terms and request.num_terms > 0 else 5
+            expr_input = request.expression.strip()
+
+            parsed_list = None
+            if expr_input.startswith("[") and expr_input.endswith("]"):
+                try:
+                    parsed_list = [sympify(x.strip()) for x in json.loads(expr_input)]
+                except Exception:
+                    pass
+            elif "," in expr_input:
+                try:
+                    parsed_list = [sympify(x.strip()) for x in expr_input.split(",")]
+                except Exception:
+                    pass
+
+            target_input = parsed_list if parsed_list is not None else sympify(expr_input)
+
+            if operation == "Sequências":
+                analysis = analyze_sequence(target_input, seq_symbol, num_terms=num_terms)
+                if "error" in analysis:
+                    return {"success": False, "result": "", "error": analysis["error"], "analysis": None}
+                result_msg = f"Termo Geral: a_n = {analysis['general_expression']} | Limite n -> oo: {analysis['limit_infinity']} ({analysis['status_message']})"
+            else:
+                analysis = analyze_series(target_input, seq_symbol, num_terms=num_terms)
+                if "error" in analysis:
+                    return {"success": False, "result": "", "error": analysis["error"], "analysis": None}
+                result_msg = f"Termo Geral: a_n = {analysis['general_expression']} | Soma S = {analysis['series_sum']} ({analysis['status_message']})"
+
+            return {
+                "success": True,
+                "result": result_msg,
+                "error": "",
+                "analysis": analysis
+            }
 
         # ==========================================
         # ROTEAMENTO PARA CÁLCULO 1 e 2
