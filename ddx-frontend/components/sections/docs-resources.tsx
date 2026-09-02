@@ -1,3 +1,5 @@
+"use client";
+
 import { BookOpen, FileCode2, Video, MessageCircle } from "lucide-react";
 
 import { GlowButton } from "@/components/ui/glow-button";
@@ -40,8 +42,8 @@ export function DocsResources() {
   return (
     <section id="docs" className="relative py-28">
       <div className="absolute inset-0 -z-10">
-        <div className="absolute right-[10%] top-16 h-[280px] w-[280px] rounded-full bg-violet-600/10 blur-[120px]" />
-        <div className="absolute left-[12%] bottom-8 h-[260px] w-[260px] rounded-full bg-[#39ff14]/6 blur-[120px]" />
+        <div className="absolute right-[10%] top-16 h-[280px] w-[280px] rounded-full bg-[#005EB8]/10 blur-[120px]" />
+        <div className="absolute left-[12%] bottom-8 h-[260px] w-[260px] rounded-full bg-[#005EB8]/6 blur-[120px]" />
       </div>
       <div className="container-ddx">
         <Reveal>
@@ -50,7 +52,7 @@ export function DocsResources() {
 
         <Reveal delay={0.05}>
           <h2 className="mx-auto max-w-4xl text-center text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            Documentação & <span className="text-violet-400">Recursos</span>
+            Documentação & <span className="text-[#005EB8]">Recursos</span>
           </h2>
         </Reveal>
 
@@ -72,7 +74,7 @@ export function DocsResources() {
           <GlowButton
             href="#launch"
             variant="secondary"
-            className="min-w-[260px] border border-violet-500/25 text-violet-300 hover:bg-violet-500/10"
+            className="min-w-[260px] border border-[#005EB8]/25 text-[#005EB8] hover:bg-[#005EB8]/10"
           >
             Acessar Documentação
           </GlowButton>

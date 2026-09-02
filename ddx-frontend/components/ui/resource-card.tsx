@@ -1,3 +1,5 @@
+"use client";
+
 import { LucideIcon } from "lucide-react";
 
 type ResourceCardProps = {
@@ -15,8 +17,8 @@ export function ResourceCard({
 }: ResourceCardProps) {
   const iconStyles =
     tone === "green"
-      ? "bg-[#39ff14]/12 text-[#39ff14]"
-      : "bg-violet-500/12 text-violet-400";
+      ? "bg-[#005EB8]/12 text-[#005EB8]"
+      : "bg-[#005EB8]/12 text-[#005EB8]";
 
   return (
     <div className="glass rounded-[26px] px-6 py-8 text-center transition duration-300 hover:-translate-y-1 hover:bg-white/[0.055]">

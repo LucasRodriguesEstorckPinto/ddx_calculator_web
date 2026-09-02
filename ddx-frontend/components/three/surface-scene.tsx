@@ -43,7 +43,7 @@ function WireSurface() {
 
   return (
     <mesh ref={meshRef} geometry={geometry} rotation={[-1.2, 0, -0.2]} position={[0, -2.5, 0]}>
-      <meshBasicMaterial color="#39ff14" wireframe transparent opacity={0.35} />
+      <meshBasicMaterial color="#005EB8" wireframe transparent opacity={0.35} />
     </mesh>
   );
 }

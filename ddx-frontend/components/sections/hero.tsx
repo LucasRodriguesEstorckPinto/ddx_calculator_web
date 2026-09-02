@@ -1,3 +1,5 @@
+"use client";
+
 import { GlowButton } from "@/components/ui/glow-button";
 import { SurfaceScene } from "@/components/three/surface-scene";
 
@@ -10,7 +12,7 @@ function StatCard({
 }) {
   return (
     <div className="glass min-w-[160px] rounded-3xl px-8 py-5 text-center">
-      <div className="text-5xl font-bold tracking-tight text-[#39ff14]">{value}</div>
+      <div className="text-5xl font-bold tracking-tight text-[#005EB8]">{value}</div>
       <div className="mt-2 text-sm text-zinc-400">{label}</div>
     </div>
   );
@@ -20,8 +22,8 @@ export function Hero() {
   return (
     <section className="hero-noise relative overflow-hidden pt-32">
       <div className="absolute inset-0 grid-bg opacity-20" />
-      <div className="absolute left-1/2 top-28 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-[#39ff14]/10 blur-[120px]" />
-      <div className="absolute right-[18%] top-36 h-[360px] w-[360px] rounded-full bg-violet-600/10 blur-[120px]" />
+      <div className="absolute left-1/2 top-28 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-[#005EB8]/10 blur-[120px]" />
+      <div className="absolute right-[18%] top-36 h-[360px] w-[360px] rounded-full bg-[#005EB8]/10 blur-[120px]" />
 
       <div className="container-ddx relative z-10 flex min-h-screen flex-col items-center justify-center pb-14 text-center">
         <div className="glass mb-8 rounded-full px-4 py-2 text-sm text-zinc-300">
@@ -36,7 +38,7 @@ export function Hero() {
 
         <p className="mt-8 max-w-3xl text-base leading-8 text-zinc-400 sm:text-lg">
           Potencializando a análise matemática com algoritmos de
-          engenharia. <span className="text-[#39ff14]">Agora com suporte completo a Álgebra Linear.</span>
+          engenharia. <span className="text-[#005EB8]">Agora com suporte completo a Álgebra Linear.</span>
         </p>
 
         <div className="mt-10 flex flex-col gap-4 sm:flex-row">
@@ -60,7 +62,7 @@ export function Hero() {
         </div>
 
         <div className="mt-10 h-14 w-8 rounded-full border border-white/10 p-1">
-          <div className="mx-auto h-3 w-1 rounded-full bg-[#39ff14]" />
+          <div className="mx-auto h-3 w-1 rounded-full bg-[#005EB8]" />
         </div>
 
         <div className="relative mt-4 h-[420px] w-screen md:h-[520px] xl:h-[620px]">

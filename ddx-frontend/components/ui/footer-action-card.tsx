@@ -1,3 +1,5 @@
+"use client";
+
 import { LucideIcon, ExternalLink } from "lucide-react";
 
 type FooterActionCardProps = {

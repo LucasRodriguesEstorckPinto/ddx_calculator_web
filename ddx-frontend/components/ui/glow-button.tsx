@@ -23,7 +23,7 @@ export function GlowButton({
 
   const styles =
     variant === "primary"
-      ? "bg-[#39ff14] text-black glow-green hover:shadow-[0_0_30px_rgba(57,255,20,0.35)]"
+      ? "bg-[#005EB8] text-black glow-green hover:shadow-[0_0_30px_rgba(0,94,184,0.35)]"
       : "glass text-white hover:bg-white/10";
 
   return (

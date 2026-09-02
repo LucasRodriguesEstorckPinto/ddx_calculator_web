@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Sigma,
   TrendingUp,
@@ -66,7 +68,7 @@ export function Features() {
 
         <Reveal delay={0.05}>
           <h2 className="mx-auto max-w-4xl text-center text-4xl font-bold tracking-tight text-white sm:text-5xl">
-            Funcionalidades <span className="text-[#39ff14]">Poderosas</span>
+            Funcionalidades <span className="text-[#005EB8]">Poderosas</span>
           </h2>
         </Reveal>
 

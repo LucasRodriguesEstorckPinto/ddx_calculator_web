@@ -146,7 +146,7 @@ export function InputPanel({
           <select
             value={selectedOperation}
             onChange={(e) => handleOperationChange(e.target.value)}
-            className="w-full rounded-2xl border border-white/8 bg-black/30 px-4 py-4 text-white outline-none transition focus:border-[#39ff14]/40"
+            className="w-full rounded-2xl border border-white/8 bg-black/30 px-4 py-4 text-white outline-none transition focus:border-[#005EB8]/40"
           >
             {operations.map((operation) => (
               <option key={operation} value={operation}>
@@ -187,7 +187,7 @@ export function InputPanel({
                       key={`${r}-${c}`}
                       value={val}
                       onChange={(e) => handleCellChange(r, c, e.target.value)}
-                      className="w-full min-w-[50px] rounded-xl border border-white/10 bg-black/30 p-3 text-center text-white outline-none transition focus:border-[#39ff14]/50"
+                      className="w-full min-w-[50px] rounded-xl border border-white/10 bg-black/30 p-3 text-center text-white outline-none transition focus:border-[#005EB8]/50"
                       placeholder="0"
                     />
                   ))
@@ -201,7 +201,7 @@ export function InputPanel({
             <textarea
               value={expression}
               onChange={(e) => setExpression(e.target.value)}
-              className="min-h-[140px] w-full rounded-2xl border border-white/8 bg-black/30 px-4 py-4 text-base text-white outline-none transition placeholder:text-zinc-600 focus:border-[#39ff14]/40"
+              className="min-h-[140px] w-full rounded-2xl border border-white/8 bg-black/30 px-4 py-4 text-base text-white outline-none transition placeholder:text-zinc-600 focus:border-[#005EB8]/40"
               placeholder={
                 selectedOperation === "Sequências"
                   ? "Ex.: [3, 7, 11, 15, 19] ou (2*n + 1)/(n + 2)"
@@ -221,7 +221,7 @@ export function InputPanel({
               <input
                 value={variables}
                 onChange={(e) => setVariables(e.target.value)}
-                className="w-full rounded-2xl border border-white/8 bg-black/30 px-4 py-4 text-white outline-none transition focus:border-[#39ff14]/40"
+                className="w-full rounded-2xl border border-white/8 bg-black/30 px-4 py-4 text-white outline-none transition focus:border-[#005EB8]/40"
                 placeholder={
                   selectedOperation === "Sequências" || selectedOperation === "Séries"
                     ? "n"
@@ -239,7 +239,7 @@ export function InputPanel({
                 <input
                   value={interval}
                   onChange={(e) => setIntervalValue(e.target.value)}
-                  className="w-full rounded-2xl border border-white/8 bg-black/30 px-4 py-4 text-white outline-none transition focus:border-[#39ff14]/40"
+                  className="w-full rounded-2xl border border-white/8 bg-black/30 px-4 py-4 text-white outline-none transition focus:border-[#005EB8]/40"
                   placeholder="[-10, 10]"
                 />
               </div>
@@ -249,7 +249,8 @@ export function InputPanel({
 
         {selectedOperation === "Derivada" && (
            <div className="space-y-5 rounded-2xl border border-white/8 bg-white/[0.02] p-4">
-             {/* Conteúdo mantido conforme suas configurações anteriores */}
+             {
+             }
            </div>
         )}
 
@@ -257,7 +258,7 @@ export function InputPanel({
           onClick={onCalculate}
           disabled={loading}
           className={`w-full rounded-2xl px-5 py-4 font-semibold text-black transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-70 ${
-            mode === "alglin" ? "bg-[#39ff14]" : mode === "calc1" ? "bg-[#39ff14]" : "bg-violet-500 text-white"
+            mode === "alglin" ? "bg-[#005EB8]" : mode === "calc1" ? "bg-[#005EB8]" : "bg-[#005EB8] text-white"
           }`}
         >
           {loading ? "Processando..." : "Calcular"}

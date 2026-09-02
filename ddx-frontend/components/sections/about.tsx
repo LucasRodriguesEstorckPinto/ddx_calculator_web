@@ -1,3 +1,5 @@
+"use client";
+
 import {
   BookOpen,
   Code2,
@@ -37,8 +39,8 @@ export function About() {
   return (
     <section id="about" className="relative py-28">
       <div className="absolute inset-0 -z-10">
-        <div className="absolute left-[16%] top-24 h-[260px] w-[260px] rounded-full bg-violet-600/10 blur-[120px]" />
-        <div className="absolute right-[12%] top-20 h-[280px] w-[280px] rounded-full bg-[#39ff14]/8 blur-[120px]" />
+        <div className="absolute left-[16%] top-24 h-[260px] w-[260px] rounded-full bg-[#005EB8]/10 blur-[120px]" />
+        <div className="absolute right-[12%] top-20 h-[280px] w-[280px] rounded-full bg-[#005EB8]/8 blur-[120px]" />
       </div>
 
       <div className="container-ddx grid gap-12 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
@@ -49,7 +51,7 @@ export function About() {
 
           <Reveal delay={0.05}>
             <h2 className="max-w-2xl text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-              Construído por <span className="text-[#39ff14]">Engenheiros</span>,
+              Construído por <span className="text-[#005EB8]">Engenheiros</span>,
               <br />
               Para Engenheiros
             </h2>
@@ -59,8 +61,8 @@ export function About() {
             <p className="mt-8 max-w-2xl text-base leading-8 text-zinc-400 sm:text-lg">
               O DDX nasceu de uma necessidade real durante o curso de Engenharia
               da Computação. Combinando o poder do cálculo simbólico do{" "}
-              <span className="text-[#39ff14]">SymPy</span> com a eficiência
-              numérica do <span className="text-violet-400">NumPy</span>,
+              <span className="text-[#005EB8]">SymPy</span> com a eficiência
+              numérica do <span className="text-[#005EB8]">NumPy</span>,
               criamos uma ferramenta que simplifica problemas complexos de
               Cálculo Multivariável.
             </p>
@@ -76,7 +78,7 @@ export function About() {
 
           <Reveal delay={0.18}>
             <div className="glass mt-10 inline-flex items-center gap-4 rounded-[24px] px-5 py-5">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#39ff14]/12 text-[#39ff14]">
+              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#005EB8]/12 text-[#005EB8]">
                 <GraduationCap size={24} strokeWidth={2.2} />
               </div>
 
