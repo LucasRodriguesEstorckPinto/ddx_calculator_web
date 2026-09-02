@@ -1,3 +1,5 @@
+"use client";
+
 type SectionBadgeProps = {
   children: React.ReactNode;
   color?: "green" | "purple";
@@ -9,7 +11,7 @@ export function SectionBadge({
 }: SectionBadgeProps) {
   const styles =
     color === "green"
-      ? "text-[#39ff14]"
+      ? "text-[#005EB8]"
       : "text-[#a855f7]";
 
   return (

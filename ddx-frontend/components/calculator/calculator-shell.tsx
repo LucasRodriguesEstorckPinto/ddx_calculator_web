@@ -116,7 +116,7 @@ export function CalculatorShell() {
 
   return (
     
-    <div className="min-h-screen bg-[radial-gradient(circle_at_20%_10%,rgba(57,255,20,0.12),transparent_18%),radial-gradient(circle_at_50%_50%,rgba(57,255,20,0.10),transparent_18%),radial-gradient(circle_at_80%_18%,rgba(139,92,246,0.12),transparent_18%),linear-gradient(to_bottom,#050505,#040404)] text-white">
+    <div className="min-h-screen bg-[radial-gradient(circle_at_20%_10%,rgba(0,94,184,0.12),transparent_18%),radial-gradient(circle_at_50%_50%,rgba(0,94,184,0.10),transparent_18%),radial-gradient(circle_at_80%_18%,rgba(0,94,184,0.12),transparent_18%),linear-gradient(to_bottom,#050505,#040404)] text-white">
       <header className="sticky top-0 z-40 border-b border-white/5 bg-black/40 backdrop-blur-xl">
         <div className="container-ddx flex h-20 items-center justify-between">
           <div className="flex items-center gap-4">
@@ -131,7 +131,7 @@ export function CalculatorShell() {
             <div>
               <div className="text-2xl font-bold tracking-tight">
                 <span className="text-white">D</span>
-                <span className="text-[#39ff14]">D</span>
+                <span className="text-[#005EB8]">D</span>
                 <span className="text-white">X</span>
               </div>
               <div className="text-xs text-zinc-500">
@@ -141,7 +141,7 @@ export function CalculatorShell() {
           </div>
 
           <div className="hidden items-center gap-3 rounded-full border border-white/8 bg-white/[0.03] px-4 py-2 text-sm text-zinc-300 md:flex">
-            <Sparkles size={16} className="text-[#39ff14]" />
+            <Sparkles size={16} className="text-[#005EB8]" />
             IA explicativa integrada
           </div>
         </div>
@@ -154,7 +154,7 @@ export function CalculatorShell() {
               Workspace
             </div>
             <h1 className="mt-3 max-w-3xl text-4xl font-bold tracking-tight text-white sm:text-5xl">
-              Ferramenta de <span className="text-[#39ff14]">matemática</span>{" "}
+              Ferramenta de <span className="text-[#005EB8]">matemática</span>{" "}
               com análise, gráfico e explicação
             </h1>
             <p className="mt-4 max-w-2xl text-zinc-400">

@@ -11,9 +11,9 @@
   --text-soft: #a1a1aa;
   --text-faint: #71717a;
 
-  --green: #39ff14;
-  --green-soft: #72ff52;
-  --purple: #8b5cf6;
+  --green: #005EB8;
+  --green-soft: #005EB8;
+  --purple: #005EB8;
 
   --container: 1280px;
 }
@@ -29,8 +29,8 @@ html {
 body {
   min-height: 100vh;
   background:
-    radial-gradient(circle at 35% 25%, rgba(57, 255, 20, 0.16), transparent 22%),
-    radial-gradient(circle at 65% 30%, rgba(139, 92, 246, 0.14), transparent 20%),
+    radial-gradient(circle at 35% 25%, rgba(0, 94, 184, 0.16), transparent 22%),
+    radial-gradient(circle at 65% 30%, rgba(0, 94, 184, 0.14), transparent 20%),
     linear-gradient(to bottom, #040404, #050505 35%, #020202 100%);
   color: var(--text);
   font-family: var(--font-inter), sans-serif;
@@ -64,8 +64,8 @@ a {
 
 .glow-green {
   box-shadow:
-    0 0 20px rgba(57, 255, 20, 0.25),
-    0 0 48px rgba(57, 255, 20, 0.18);
+    0 0 20px rgba(0, 94, 184, 0.25),
+    0 0 48px rgba(0, 94, 184, 0.18);
 }
 
 .grid-bg {

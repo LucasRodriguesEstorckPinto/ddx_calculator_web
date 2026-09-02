@@ -292,7 +292,7 @@ export function GraphPanel({
         y: series.y,
         type: "scatter",
         mode: "lines",
-        line: { color: "#39ff14", width: 3 },
+        line: { color: "#005EB8", width: 3 },
         name: source,
         hovertemplate: "x=%{x:.3f}<br>y=%{y:.3f}<extra></extra>",
       },

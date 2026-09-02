@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Code,
   FileText,
@@ -38,8 +40,8 @@ export function Footer() {
   return (
     <footer className="relative border-t border-white/5 py-20">
       <div className="absolute inset-0 -z-10">
-        <div className="absolute left-[20%] top-16 h-[220px] w-[220px] rounded-full bg-violet-600/8 blur-[120px]" />
-        <div className="absolute right-[18%] top-10 h-[220px] w-[220px] rounded-full bg-[#39ff14]/6 blur-[120px]" />
+        <div className="absolute left-[20%] top-16 h-[220px] w-[220px] rounded-full bg-[#005EB8]/8 blur-[120px]" />
+        <div className="absolute right-[18%] top-10 h-[220px] w-[220px] rounded-full bg-[#005EB8]/6 blur-[120px]" />
       </div>
 
       <div className="container-ddx">
@@ -48,7 +50,7 @@ export function Footer() {
             <div className="flex items-center gap-4">
               <div className="text-4xl font-bold tracking-tight">
                 <span className="text-white">D</span>
-                <span className="text-[#39ff14]">D</span>
+                <span className="text-[#005EB8]">D</span>
                 <span className="text-white">X</span>
               </div>
 
@@ -101,7 +103,7 @@ export function Footer() {
           <div className="flex items-center gap-3">
             <span className="font-semibold text-white">
               <span className="text-white">D</span>
-              <span className="text-[#39ff14]">D</span>
+              <span className="text-[#005EB8]">D</span>
               <span className="text-white">X</span>
             </span>
             <span>•</span>

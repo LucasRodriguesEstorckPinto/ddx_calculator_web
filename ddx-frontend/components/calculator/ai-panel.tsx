@@ -202,7 +202,7 @@ export function AiPanel({
   return (
     <section className="rounded-3xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-xl">
       <div className="mb-4">
-        <p className="mb-1 text-xs font-semibold uppercase tracking-[0.22em] text-violet-400">
+        <p className="mb-1 text-xs font-semibold uppercase tracking-[0.22em] text-[#005EB8]">
           Assistente IA
         </p>
         <h3 className="text-xl font-semibold text-white">Gemini no DDX</h3>
@@ -217,7 +217,7 @@ export function AiPanel({
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           rows={4}
-          className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none transition focus:border-lime-400/50"
+          className="w-full rounded-2xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none transition focus:border-[#005EB8]/50"
           placeholder="Ex.: Explique o resultado de forma intuitiva."
         />
 
@@ -225,7 +225,7 @@ export function AiPanel({
           type="button"
           onClick={handleAskGemini}
           disabled={loading}
-          className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-lime-400 px-4 py-2 text-sm font-semibold text-black transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-[#005EB8] px-4 py-2 text-sm font-semibold text-black transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {loading ? "Consultando..." : "Perguntar ao Gemini"}
         </button>

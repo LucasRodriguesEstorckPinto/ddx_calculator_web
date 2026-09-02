@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { GlowButton } from "@/components/ui/glow-button";
 
@@ -14,7 +16,7 @@ export function Header() {
         <Link href="/" className="flex items-center gap-3">
           <div className="font-[var(--font-space)] text-3xl font-bold tracking-tight">
             <span className="text-white">D</span>
-            <span className="text-[#39ff14]">D</span>
+            <span className="text-[#005EB8]">D</span>
             <span className="text-white">X</span>
           </div>
 

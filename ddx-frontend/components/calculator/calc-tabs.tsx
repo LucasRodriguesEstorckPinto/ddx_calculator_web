@@ -14,7 +14,7 @@ export function CalcTabs({ value, onChange }: CalcTabsProps) {
         onClick={() => onChange("alglin")}
         className={`rounded-xl px-5 py-3 text-sm font-medium transition whitespace-nowrap ${
           value === "alglin"
-            ? "bg-[#39ff14] text-black" 
+            ? "bg-[#005EB8] text-black" 
             : "text-zinc-300 hover:bg-white/5"
         }`}
       >
@@ -25,7 +25,7 @@ export function CalcTabs({ value, onChange }: CalcTabsProps) {
         onClick={() => onChange("calc1")}
         className={`rounded-xl px-5 py-3 text-sm font-medium transition whitespace-nowrap ${
           value === "calc1"
-            ? "bg-[#39ff14] text-black"
+            ? "bg-[#005EB8] text-black"
             : "text-zinc-300 hover:bg-white/5"
         }`}
       >
@@ -36,7 +36,7 @@ export function CalcTabs({ value, onChange }: CalcTabsProps) {
         onClick={() => onChange("calc2")}
         className={`rounded-xl px-5 py-3 text-sm font-medium transition whitespace-nowrap ${
           value === "calc2"
-            ? "bg-violet-500 text-white"
+            ? "bg-[#005EB8] text-white"
             : "text-zinc-300 hover:bg-white/5"
         }`}
       >
