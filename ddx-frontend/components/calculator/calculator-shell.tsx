@@ -28,13 +28,19 @@ type AnalysisResult = {
   local_maxima?: string[];
   local_minima?: string[];
   vertical_asymptotes?: string[];
+  general_expression?: string;
+  limit_infinity?: string;
+  limit_term_general?: string; // ADICIONADO: Limite do termo geral da série
+  series_sum?: string;         // ADICIONADO: Soma da série infinita
+  test_used?: string;          // ADICIONADO: Teste de convergência utilizado
+  is_convergent?: boolean;
+  status_message?: string;
+  first_terms?: string[];
 } | null;
 
 export function CalculatorShell() {
-  // Define a Álgebra Linear como o modo inicial padrão
   const [mode, setMode] = useState<"alglin" | "calc1" | "calc2">("alglin");
   
-  // O estado inicial da expressão para alglin será uma matriz 3x3 vazia em JSON
   const [expression, setExpression] = useState(
     JSON.stringify([["", "", ""], ["", "", ""], ["", "", ""]])
   );
@@ -67,9 +73,12 @@ export function CalculatorShell() {
 
       if (selectedOperation === "Derivadas Parciais") {
         variable = partialVariable;
+      } else if (selectedOperation === "Sequências" || selectedOperation === "Séries") {
+        variable = variable || "n"; // Padrão "n" para sequências e séries
+      } else {
+        variable = variable || "x";
       }
 
-      // Agora enviamos o 'mode' no payload para o backend rotear corretamente
       const data = await calculateMath({
         mode,
         expression,
@@ -115,7 +124,6 @@ export function CalculatorShell() {
   }
 
   return (
-    
     <div className="min-h-screen bg-[radial-gradient(circle_at_20%_10%,rgba(0,94,184,0.12),transparent_18%),radial-gradient(circle_at_50%_50%,rgba(0,94,184,0.10),transparent_18%),radial-gradient(circle_at_80%_18%,rgba(0,94,184,0.12),transparent_18%),linear-gradient(to_bottom,#050505,#040404)] text-white">
       <header className="sticky top-0 z-40 border-b border-white/5 bg-black/40 backdrop-blur-xl">
         <div className="container-ddx flex h-20 items-center justify-between">
@@ -180,7 +188,7 @@ export function CalculatorShell() {
                 setExpression("x**2 + y**2 + 2*x*y");
                 setSelectedOperation("Derivadas Parciais");
                 setVariables("x, y");
-              }
+              } 
 
               setDerivativeOrder(1);
               setLimitPoint("0");
@@ -243,9 +251,8 @@ export function CalculatorShell() {
               analysis={analysis}
             />
             
-            {/* Ocultei o GraphPanel para alglin momentaneamente. 
-                Pode ser reativado quando a visualização 3D de vetores estiver pronta. */}
-            {mode !== "alglin" && (
+            {/* Oculta o GraphPanel para alglin, Sequências e Séries */}
+            {mode !== "alglin" && selectedOperation !== "Sequências" && selectedOperation !== "Séries" && (
               <GraphPanel
                 expression={expression}
                 interval={interval}

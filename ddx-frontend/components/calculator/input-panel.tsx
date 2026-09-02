@@ -66,12 +66,34 @@ export function InputPanel({
 }: InputPanelProps) {
   const algLinOperations = ["Determinante", "Matriz Inversa", "Escalonamento", "Autovalores e Autovetores", "Sistema Linear"];
   const calc1Operations = ["Derivada", "Integral", "Limite", "Estudo de Função"];
-  const calc2Operations = ["Derivadas Parciais", "Integral Dupla"];
+  // ADICIONADO: "Séries" na lista de operações do Cálculo 2
+  const calc2Operations = ["Derivadas Parciais", "Integral Dupla", "Sequências", "Séries"];
 
   const operations = 
     mode === "alglin" ? algLinOperations :
     mode === "calc1" ? calc1Operations : 
     calc2Operations;
+  
+  // Trata a troca de operações no Select
+  const handleOperationChange = (newOperation: string) => {
+    setSelectedOperation(newOperation);
+
+    // Se o usuário mudou para "Sequências", aplica o exemplo e a variável 'n'
+    if (newOperation === "Sequências") {
+      setExpression("[3, 7, 11, 15, 19]");
+      setVariables("n");
+    } 
+    // ADICIONADO: Se o usuário mudou para "Séries", aplica um exemplo convergente e variável 'n'
+    else if (newOperation === "Séries") {
+      setExpression("(1/2)^n");
+      setVariables("n");
+    }
+    // Se o usuário estava em Sequências/Séries e mudou para outra operação do Calc 2, restaura o padrão
+    else if (selectedOperation === "Sequências" || selectedOperation === "Séries") {
+      setExpression("x**2 + y**2 + 2*x*y");
+      setVariables("x, y");
+    }
+  };
 
   // Estados locais para controlar a grade da matriz em Álgebra Linear
   const [rows, setRows] = useState(3);
@@ -102,7 +124,6 @@ export function InputPanel({
   // Sincroniza a grade visual com a prop 'expression' que vai para o backend
   useEffect(() => {
     if (mode === "alglin") {
-      // Converte a matriz para string JSON (ex: [["1","2"],["3","4"]])
       setExpression(JSON.stringify(matrix));
     }
   }, [matrix, mode, setExpression]);
@@ -124,7 +145,7 @@ export function InputPanel({
           <label className="mb-2 block text-sm text-zinc-400">Operação</label>
           <select
             value={selectedOperation}
-            onChange={(e) => setSelectedOperation(e.target.value)}
+            onChange={(e) => handleOperationChange(e.target.value)}
             className="w-full rounded-2xl border border-white/8 bg-black/30 px-4 py-4 text-white outline-none transition focus:border-[#005EB8]/40"
           >
             {operations.map((operation) => (
@@ -135,7 +156,7 @@ export function InputPanel({
           </select>
         </div>
 
-        {/* GRADE VISUAL PARA ÁLGEBRA LINEAR */}
+        {/* GRADE VISUAL PARA ÁLGEBRA LINEAR OU TEXTAREA PARA CÁLCULO */}
         {mode === "alglin" ? (
           <div className="space-y-4 rounded-2xl border border-white/8 bg-white/[0.02] p-4">
             <div className="flex items-center justify-between">
@@ -175,19 +196,24 @@ export function InputPanel({
             </div>
           </div>
         ) : (
-          /* TEXTAREA PARA CÁLCULO 1 E 2 */
           <div>
             <label className="mb-2 block text-sm text-zinc-400">Expressão</label>
             <textarea
               value={expression}
               onChange={(e) => setExpression(e.target.value)}
               className="min-h-[140px] w-full rounded-2xl border border-white/8 bg-black/30 px-4 py-4 text-base text-white outline-none transition placeholder:text-zinc-600 focus:border-[#005EB8]/40"
-              placeholder="Ex.: x**3 - 3*x + 1"
+              placeholder={
+                selectedOperation === "Sequências"
+                  ? "Ex.: [3, 7, 11, 15, 19] ou (2*n + 1)/(n + 2)"
+                  : selectedOperation === "Séries"
+                  ? "Ex.: (1/2)^n ou 1/(n**2) ou 1/n"
+                  : "Ex.: x**3 - 3*x + 1"
+              }
             />
           </div>
         )}
 
-        {/* MANTÉM OS CAMPOS DE VARIÁVEIS E INTERVALO PARA CÁLCULO 1 E 2 */}
+        {/* CAMPOS DE VARIÁVEIS E INTERVALO PARA CÁLCULO 1 E 2 */}
         {mode !== "alglin" && (
           <>
             <div>
@@ -196,26 +222,35 @@ export function InputPanel({
                 value={variables}
                 onChange={(e) => setVariables(e.target.value)}
                 className="w-full rounded-2xl border border-white/8 bg-black/30 px-4 py-4 text-white outline-none transition focus:border-[#005EB8]/40"
-                placeholder={mode === "calc1" ? "x" : "x, y"}
+                placeholder={
+                  selectedOperation === "Sequências" || selectedOperation === "Séries"
+                    ? "n"
+                    : mode === "calc1"
+                    ? "x"
+                    : "x, y"
+                }
               />
             </div>
 
-            <div>
-              <label className="mb-2 block text-sm text-zinc-400">Intervalo do gráfico</label>
-              <input
-                value={interval}
-                onChange={(e) => setIntervalValue(e.target.value)}
-                className="w-full rounded-2xl border border-white/8 bg-black/30 px-4 py-4 text-white outline-none transition focus:border-[#005EB8]/40"
-                placeholder="[-10, 10]"
-              />
-            </div>
+            {/* Oculta o intervalo do gráfico para "Sequências" e "Séries" */}
+            {selectedOperation !== "Sequências" && selectedOperation !== "Séries" && (
+              <div>
+                <label className="mb-2 block text-sm text-zinc-400">Intervalo do gráfico</label>
+                <input
+                  value={interval}
+                  onChange={(e) => setIntervalValue(e.target.value)}
+                  className="w-full rounded-2xl border border-white/8 bg-black/30 px-4 py-4 text-white outline-none transition focus:border-[#005EB8]/40"
+                  placeholder="[-10, 10]"
+                />
+              </div>
+            )}
           </>
         )}
 
-        {/* ... LÓGICA CONDICIONAL RESTANTE (Limites, Integrais, etc) MANTIDA IGUAL ... */}
         {selectedOperation === "Derivada" && (
            <div className="space-y-5 rounded-2xl border border-white/8 bg-white/[0.02] p-4">
-             {/* Conteúdo da derivada omitido por brevidade, mas você mantém o que já tinha */}
+             {
+             }
            </div>
         )}
 
