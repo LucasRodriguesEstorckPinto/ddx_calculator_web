@@ -74,7 +74,7 @@ export function CalculatorShell() {
       if (selectedOperation === "Derivadas Parciais") {
         variable = partialVariable;
       } else if (selectedOperation === "Sequências" || selectedOperation === "Séries") {
-        variable = variable || "n"; // Padrão "n" para sequências e séries
+        variable = variable || "n";
       } else {
         variable = variable || "x";
       }
