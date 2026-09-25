@@ -150,7 +150,7 @@ export function AiPanel({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  async function handleAskGemini() {
+  async function handleAskAI() {
     if (!expression.trim()) {
       setError("Digite uma expressão antes de consultar o assistente.");
       return;
@@ -161,7 +161,8 @@ export function AiPanel({
     setAnswer("");
 
     try {
-      const response = await fetch("/api/gemini", {
+      // Atualizado para apontar para a nova rota do Cerebras
+      const response = await fetch("/api/cerebras", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -177,18 +178,7 @@ export function AiPanel({
       const data = await response.json();
 
       if (!response.ok) {
-        const rawError = data?.error || "Falha ao consultar o Gemini.";
-
-        if (
-          typeof rawError === "string" &&
-          rawError.toLowerCase().includes("high demand")
-        ) {
-          throw new Error(
-            "O Gemini está em alta demanda agora. Tente novamente em instantes."
-          );
-        }
-
-        throw new Error(rawError);
+        throw new Error(data?.error || "Falha ao consultar a IA.");
       }
 
       setAnswer(cleanAnswer(data.text || "Sem resposta."));
@@ -205,9 +195,9 @@ export function AiPanel({
         <p className="mb-1 text-xs font-semibold uppercase tracking-[0.22em] text-[#005EB8]">
           Assistente IA
         </p>
-        <h3 className="text-xl font-semibold text-white">Gemini no DDX</h3>
+        <h3 className="text-xl font-semibold text-white">Cerebras no DDX</h3>
         <p className="mt-2 text-sm text-white/60">
-          Use o Gemini para interpretar resultados, explicar conceitos e
+          Use a IA de ultrabaixa latência para interpretar resultados, explicar conceitos e
           contextualizar a operação selecionada.
         </p>
       </div>
@@ -223,11 +213,11 @@ export function AiPanel({
 
         <button
           type="button"
-          onClick={handleAskGemini}
+          onClick={handleAskAI}
           disabled={loading}
           className="inline-flex min-h-11 items-center justify-center rounded-2xl bg-[#005EB8] px-4 py-2 text-sm font-semibold text-black transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          {loading ? "Consultando..." : "Perguntar ao Gemini"}
+          {loading ? "Consultando..." : "Perguntar à IA"}
         </button>
 
         {error ? (
