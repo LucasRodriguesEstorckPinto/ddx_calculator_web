@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import OpenAI from "openai";
 
-// Inicializa o cliente OpenAI apontando para a API do Cerebras
+// Inicializa o cliente OpenAI apontando para a API do Groq
 const client = new OpenAI({
-  apiKey: process.env.CEREBRAS_API_KEY,
-  baseURL: "https://api.cerebras.ai/v1",
+  apiKey: process.env.GROQ_API_KEY,
+  baseURL: "https://api.groq.com/openai/v1",
 });
 
 export async function POST(req: Request) {
@@ -25,12 +25,12 @@ Pergunta do usuário: ${prompt}
 `;
 
     const completion = await client.chat.completions.create({
-      model: "llama3.1-70b",
+      model: "openai/gpt-oss-20b",
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: userMessage },
       ],
-      temperature: 0.2, // Baixa temperatura para manter precisão matemática
+      temperature: 0.2,
     });
 
     return NextResponse.json({ 
@@ -38,7 +38,7 @@ Pergunta do usuário: ${prompt}
     });
 
   } catch (error: any) {
-    console.error("Erro no Cerebras:", error);
+    console.error("Erro no Groq:", error);
     return NextResponse.json(
       { error: "Falha ao consultar o assistente de IA." },
       { status: 500 }

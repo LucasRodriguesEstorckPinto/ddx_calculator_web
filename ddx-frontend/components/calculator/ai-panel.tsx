@@ -161,8 +161,7 @@ export function AiPanel({
     setAnswer("");
 
     try {
-      // Atualizado para apontar para a nova rota do Cerebras
-      const response = await fetch("/api/cerebras", {
+      const response = await fetch("/api/groq", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -195,7 +194,7 @@ export function AiPanel({
         <p className="mb-1 text-xs font-semibold uppercase tracking-[0.22em] text-[#005EB8]">
           Assistente IA
         </p>
-        <h3 className="text-xl font-semibold text-white">Cerebras no DDX</h3>
+        <h3 className="text-xl font-semibold text-white">Groq no DDX</h3>
         <p className="mt-2 text-sm text-white/60">
           Use a IA de ultrabaixa latência para interpretar resultados, explicar conceitos e
           contextualizar a operação selecionada.
