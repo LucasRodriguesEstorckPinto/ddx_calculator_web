@@ -161,8 +161,6 @@ export function CalculatorShell() {
             setLimitPoint={setLimitPoint}
             limitDirection={limitDirection}
             setLimitDirection={setLimitDirection}
-            partialVariable={partialVariable}
-            setPartialVariable={setPartialVariable}
             tangentPoint={tangentPoint}
             setTangentPoint={setTangentPoint}
             isDefiniteIntegral={isDefiniteIntegral}
@@ -178,11 +176,7 @@ export function CalculatorShell() {
               mode={mode}
               expression={expression}
               selectedOperation={selectedOperation}
-              variables={
-                selectedOperation === "Derivadas Parciais"
-                  ? partialVariable
-                  : variables
-              }
+              variables={"x"}
               computedResult={result}
               error={error}
               analysis={analysis}
@@ -213,5 +207,4 @@ export function CalculatorShell() {
         </div>
       </main>
     </div>
-  );
-}
+  );}}

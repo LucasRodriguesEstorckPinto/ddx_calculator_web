@@ -31,17 +31,6 @@ export function CalcTabs({ value, onChange }: CalcTabsProps) {
       >
         Cálculo 1
       </button>
-
-      <button
-        onClick={() => onChange("calc2")}
-        className={`rounded-xl px-5 py-3 text-sm font-medium transition whitespace-nowrap ${
-          value === "calc2"
-            ? "bg-[#005EB8] text-white"
-            : "text-zinc-300 hover:bg-white/5"
-        }`}
-      >
-        Cálculo 2
-      </button>
     </div>
   );
 }
