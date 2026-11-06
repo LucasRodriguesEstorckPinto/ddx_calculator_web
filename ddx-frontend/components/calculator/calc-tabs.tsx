@@ -1,6 +1,6 @@
 "use client";
 
-type CalcMode = "alglin" | "calc1" | "calc2";
+type CalcMode = "alglin" | "calc1";
 
 type CalcTabsProps = {
   value: CalcMode;

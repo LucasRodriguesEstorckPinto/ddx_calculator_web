@@ -28,18 +28,10 @@ type AnalysisResult = {
   local_maxima?: string[];
   local_minima?: string[];
   vertical_asymptotes?: string[];
-  general_expression?: string;
-  limit_infinity?: string;
-  limit_term_general?: string; // ADICIONADO: Limite do termo geral da série
-  series_sum?: string;         // ADICIONADO: Soma da série infinita
-  test_used?: string;          // ADICIONADO: Teste de convergência utilizado
-  is_convergent?: boolean;
-  status_message?: string;
-  first_terms?: string[];
 } | null;
 
 export function CalculatorShell() {
-  const [mode, setMode] = useState<"alglin" | "calc1" | "calc2">("alglin");
+  const [mode, setMode] = useState<"alglin" | "calc1">("alglin");
   
   const [expression, setExpression] = useState(
     JSON.stringify([["", "", ""], ["", "", ""], ["", "", ""]])
@@ -56,7 +48,6 @@ export function CalculatorShell() {
   const [derivativeOrder, setDerivativeOrder] = useState(1);
   const [limitPoint, setLimitPoint] = useState("0");
   const [limitDirection, setLimitDirection] = useState("+");
-  const [partialVariable, setPartialVariable] = useState("x");
   const [tangentPoint, setTangentPoint] = useState("0");
 
   const [isDefiniteIntegral, setIsDefiniteIntegral] = useState(false);
@@ -68,60 +59,7 @@ export function CalculatorShell() {
     setError("");
     setAnalysis(null);
 
-    try {
-      let variable = variables.split(",")[0].trim() || "x";
-
-      if (selectedOperation === "Derivadas Parciais") {
-        variable = partialVariable;
-      } else if (selectedOperation === "Sequências" || selectedOperation === "Séries") {
-        variable = variable || "n";
-      } else {
-        variable = variable || "x";
-      }
-
-      const data = await calculateMath({
-        mode,
-        expression,
-        operation: selectedOperation,
-        variable,
-        point: limitPoint,
-        direction: limitDirection,
-        order: derivativeOrder,
-        definite_integral: isDefiniteIntegral,
-        lower_bound: lowerBound,
-        upper_bound: upperBound,
-      });
-
-      if (!data.success) {
-        setError(data.error || "Erro ao calcular");
-        setResult("Falha no cálculo");
-        setAnalysis(null);
-      } else {
-        setResult(data.result || "Calculado");
-        setAnalysis(data.analysis || null);
-      }
-    } catch (err) {
-      if (err instanceof Error) {
-        if (err.message === "TIMEOUT") {
-          setError("O backend demorou demais para responder.");
-        } else if (err.message.startsWith("HTTP_")) {
-          setError(`Erro do servidor: ${err.message.replace("HTTP_", "")}`);
-        } else if (err.message.startsWith("INVALID_JSON:")) {
-          setError("O backend respondeu, mas o JSON veio inválido.");
-          console.error(err.message);
-        } else {
-          setError("Não foi possível conectar ao backend matemático.");
-        }
-      } else {
-        setError("Não foi possível conectar ao backend matemático.");
-      }
-
-      setResult("Falha no cálculo");
-      setAnalysis(null);
-    } finally {
-      setLoading(false);
-    }
-  }
+    const variable = variables.split(",")[0].trim() || "x";
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_20%_10%,rgba(0,94,184,0.12),transparent_18%),radial-gradient(circle_at_50%_50%,rgba(0,94,184,0.10),transparent_18%),radial-gradient(circle_at_80%_18%,rgba(0,94,184,0.12),transparent_18%),linear-gradient(to_bottom,#050505,#040404)] text-white">
@@ -185,15 +123,14 @@ export function CalculatorShell() {
                 setSelectedOperation("Derivada");
                 setVariables("x");
               } else {
-                setExpression("x**2 + y**2 + 2*x*y");
-                setSelectedOperation("Derivadas Parciais");
-                setVariables("x, y");
+                setExpression("x**3 - 3*x + 1");
+                setSelectedOperation("Derivada");
+                setVariables("x");
               } 
 
               setDerivativeOrder(1);
               setLimitPoint("0");
               setLimitDirection("+");
-              setPartialVariable("x");
               setTangentPoint("0");
               setIsDefiniteIntegral(false);
               setLowerBound("0");

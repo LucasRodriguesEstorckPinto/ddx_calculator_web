@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 
-type CalcMode = "alglin" | "calc1" | "calc2";
+type CalcMode = "alglin" | "calc1";
 
 type InputPanelProps = {
   mode: CalcMode;
@@ -16,15 +16,12 @@ type InputPanelProps = {
   setIntervalValue: (value: string) => void;
   onCalculate: () => void;
   loading: boolean;
-  // Props de Cálculo 1 e 2
   derivativeOrder: number;
   setDerivativeOrder: (value: number) => void;
   limitPoint: string;
   setLimitPoint: (value: string) => void;
   limitDirection: string;
   setLimitDirection: (value: string) => void;
-  partialVariable: string;
-  setPartialVariable: (value: string) => void;
   tangentPoint: string;
   setTangentPoint: (value: string) => void;
   isDefiniteIntegral: boolean;
@@ -53,8 +50,6 @@ export function InputPanel({
   setLimitPoint,
   limitDirection,
   setLimitDirection,
-  partialVariable,
-  setPartialVariable,
   tangentPoint,
   setTangentPoint,
   isDefiniteIntegral,
@@ -66,43 +61,17 @@ export function InputPanel({
 }: InputPanelProps) {
   const algLinOperations = ["Determinante", "Matriz Inversa", "Escalonamento", "Autovalores e Autovetores", "Sistema Linear"];
   const calc1Operations = ["Derivada", "Integral", "Limite", "Estudo de Função"];
-  // ADICIONADO: "Séries" na lista de operações do Cálculo 2
-  const calc2Operations = ["Derivadas Parciais", "Integral Dupla", "Sequências", "Séries"];
 
-  const operations = 
-    mode === "alglin" ? algLinOperations :
-    mode === "calc1" ? calc1Operations : 
-    calc2Operations;
+  const operations = mode === "alglin" ? algLinOperations : calc1Operations;
+
   
-  // Trata a troca de operações no Select
-  const handleOperationChange = (newOperation: string) => {
-    setSelectedOperation(newOperation);
-
-    // Se o usuário mudou para "Sequências", aplica o exemplo e a variável 'n'
-    if (newOperation === "Sequências") {
-      setExpression("[3, 7, 11, 15, 19]");
-      setVariables("n");
-    } 
-    // ADICIONADO: Se o usuário mudou para "Séries", aplica um exemplo convergente e variável 'n'
-    else if (newOperation === "Séries") {
-      setExpression("(1/2)^n");
-      setVariables("n");
-    }
-    // Se o usuário estava em Sequências/Séries e mudou para outra operação do Calc 2, restaura o padrão
-    else if (selectedOperation === "Sequências" || selectedOperation === "Séries") {
-      setExpression("x**2 + y**2 + 2*x*y");
-      setVariables("x, y");
-    }
-  };
-
-  // Estados locais para controlar a grade da matriz em Álgebra Linear
   const [rows, setRows] = useState(3);
   const [cols, setCols] = useState(3);
   const [matrix, setMatrix] = useState<string[][]>(
     Array(3).fill("").map(() => Array(3).fill(""))
   );
 
-  // Quando o usuário alterar o tamanho, ajustamos a matriz mantendo os valores existentes
+  
   const handleDimensionChange = (newRows: number, newCols: number) => {
     const newMatrix = Array(newRows).fill("").map((_, r) => 
       Array(newCols).fill("").map((_, c) => 
@@ -121,7 +90,7 @@ export function InputPanel({
     setMatrix(newMatrix);
   };
 
-  // Sincroniza a grade visual com a prop 'expression' que vai para o backend
+ 
   useEffect(() => {
     if (mode === "alglin") {
       setExpression(JSON.stringify(matrix));
@@ -145,7 +114,7 @@ export function InputPanel({
           <label className="mb-2 block text-sm text-zinc-400">Operação</label>
           <select
             value={selectedOperation}
-            onChange={(e) => handleOperationChange(e.target.value)}
+            onChange={(e) => setSelectedOperation(e.target.value)}
             className="w-full rounded-2xl border border-white/8 bg-black/30 px-4 py-4 text-white outline-none transition focus:border-[#005EB8]/40"
           >
             {operations.map((operation) => (
@@ -156,7 +125,6 @@ export function InputPanel({
           </select>
         </div>
 
-        {/* GRADE VISUAL PARA ÁLGEBRA LINEAR OU TEXTAREA PARA CÁLCULO */}
         {mode === "alglin" ? (
           <div className="space-y-4 rounded-2xl border border-white/8 bg-white/[0.02] p-4">
             <div className="flex items-center justify-between">
@@ -201,19 +169,12 @@ export function InputPanel({
             <textarea
               value={expression}
               onChange={(e) => setExpression(e.target.value)}
-              className="min-h-[140px] w-full rounded-2xl border border-white/8 bg-black/30 px-4 py-4 text-base text-white outline-none transition placeholder:text-zinc-600 focus:border-[#005EB8]/40"
-              placeholder={
-                selectedOperation === "Sequências"
-                  ? "Ex.: [3, 7, 11, 15, 19] ou (2*n + 1)/(n + 2)"
-                  : selectedOperation === "Séries"
-                  ? "Ex.: (1/2)^n ou 1/(n**2) ou 1/n"
-                  : "Ex.: x**3 - 3*x + 1"
-              }
+              className="min-h-[140px] w-full rounded-2xl border border-white/8 bg-black/30 px-4 py-4 text-base text-white outline-none transition placeholder:text-zinc-600 focus:border-[#005EB8]/40"              
             />
           </div>
         )}
 
-        {/* CAMPOS DE VARIÁVEIS E INTERVALO PARA CÁLCULO 1 E 2 */}
+        {/* CAMPOS DE VARIÁVEIS E INTERVALO PARA CÁLCULO 1*/}
         {mode !== "alglin" && (
           <>
             <div>
@@ -222,17 +183,11 @@ export function InputPanel({
                 value={variables}
                 onChange={(e) => setVariables(e.target.value)}
                 className="w-full rounded-2xl border border-white/8 bg-black/30 px-4 py-4 text-white outline-none transition focus:border-[#005EB8]/40"
-                placeholder={
-                  selectedOperation === "Sequências" || selectedOperation === "Séries"
-                    ? "n"
-                    : mode === "calc1"
-                    ? "x"
-                    : "x, y"
-                }
+                placeholder={"x"}
               />
             </div>
 
-            {/* Oculta o intervalo do gráfico para "Sequências" e "Séries" */}
+            {}
             {selectedOperation !== "Sequências" && selectedOperation !== "Séries" && (
               <div>
                 <label className="mb-2 block text-sm text-zinc-400">Intervalo do gráfico</label>

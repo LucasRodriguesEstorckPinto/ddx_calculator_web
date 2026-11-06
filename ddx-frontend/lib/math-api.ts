@@ -1,6 +1,6 @@
 export type CalculatePayload = {
-  mode: "alglin" | "calc1" | "calc2"; // Adicionado para o roteamento no backend
-  expression: string; // Para Álgebra Linear, receberá a matriz como string JSON
+  mode: "alglin" | "calc1"; 
+  expression: string;
   operation: string;
   variable?: string;
   point?: string;
