@@ -64,7 +64,7 @@ export function About() {
               <span className="text-[#005EB8]">SymPy</span> com a eficiência
               numérica do <span className="text-[#005EB8]">NumPy</span>,
               criamos uma ferramenta que simplifica problemas complexos de
-              Cálculo Multivariável.
+              Cálculo Interativo e Álgebra Linear.
             </p>
           </Reveal>
 

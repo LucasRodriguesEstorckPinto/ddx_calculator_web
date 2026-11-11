@@ -12,7 +12,7 @@ import { Reveal } from "@/components/ui/reveal";
 const quickLinks = [
   { label: "GitHub", href: "https://github.com" },
   { label: "Documentação", href: "#docs" },
-  { label: "Portfólio", href: "https://example.com" },
+  { label: "Portfólio", href: "https://github.com/LucasRodriguesEstorckPinto/" },
 ];
 
 const actionCards = [
@@ -20,7 +20,7 @@ const actionCards = [
     icon: Code,
     title: "GitHub",
     description: "Ver código fonte",
-    href: "https://github.com",
+    href: "https://github.com/LucasRodriguesEstorckPinto/ddx_calculator_web",
   },
   {
     icon: FileText,
@@ -32,7 +32,7 @@ const actionCards = [
     icon: User,
     title: "Portfólio",
     description: "Conheça o criador",
-    href: "https://example.com",
+    href: "https://github.com/LucasRodriguesEstorckPinto",
   },
 ];
 
@@ -107,7 +107,7 @@ export function Footer() {
               <span className="text-white">X</span>
             </span>
             <span>•</span>
-            <span>Cálculo Multivariável</span>
+            <span>Cálculo Interativo</span>
           </div>
 
           <div>

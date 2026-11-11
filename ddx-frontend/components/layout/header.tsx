@@ -23,7 +23,7 @@ export function Header() {
           <div className="hidden h-8 w-px bg-white/10 md:block" />
 
           <div className="hidden text-xs text-zinc-500 md:block">
-            Cálculo Multivariável
+            Cálculo Interativo
           </div>
         </Link>
 
