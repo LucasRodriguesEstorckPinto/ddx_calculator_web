@@ -12,7 +12,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { prompt, expression, operation, result } = body;
 
-    const systemPrompt = `Você é o assistente de IA do DDX, um ambiente interativo de matemática para Álgebra Linear, Cálculo 1 e Cálculo 2.
+    const systemPrompt = `Você é o assistente de IA do DDX, um ambiente interativo de matemática para Álgebra Linear e Cálculo 1.
 Seu objetivo é explicar conceitos, passo a passo e resultados matemáticos de forma didática e clara para estudantes de engenharia.
 Use formatação LaTeX para todas as expressões matemáticas (ex: $x^2$ para inline e $$x^2$$ para blocos).`;
 
