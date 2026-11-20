@@ -58,12 +58,11 @@ class CalculateRequest(BaseModel):
     operation: str
     variable: Optional[str] = "x"
     point: Optional[str] = None
-    direction: Optional[str] = "+"  # "+", "-" ou "both"
+    direction: Optional[str] = "+"
     order: Optional[int] = 1
     definite_integral: Optional[bool] = False
     lower_bound: Optional[str] = None
     upper_bound: Optional[str] = None
-
 
 
 def step(title: str, tex: Optional[str] = None, note: Optional[str] = None) -> dict:
@@ -86,8 +85,7 @@ def fail(message: str) -> dict:
 
 
 class InvalidInput(Exception):
-    """Entrada do usuário inválida (mensagem já pronta para exibição)."""
-
+    pass
 
 
 _ALLOWED_CHARS = re.compile(r"^[0-9A-Za-z_+\-*/^().,\s]*$")
@@ -129,10 +127,8 @@ def parse_matrix(raw: str) -> Matrix:
         raise InvalidInput("Tamanho máximo suportado: 8 x 8.")
     rows = []
     for row in data:
-        # Células vazias são tratadas como zero
         rows.append([S.Zero if not str(c).strip() else parse_math(c) for c in row])
     return Matrix(rows)
-
 
 
 def to_text(value: Any) -> str:
@@ -150,7 +146,6 @@ def tx(value: Any) -> str:
 
 
 def matrix_tex(M: Matrix, split: Optional[int] = None) -> str:
-    """LaTeX de uma matriz; com `split` desenha a barra de matriz aumentada."""
     if split is None:
         return latex(M)
     rows, cols = M.shape
@@ -212,7 +207,6 @@ def try_build_point(func_expr, symbol: Symbol, x_value_expr) -> Optional[str]:
         return f"({to_text(x_value_expr)}, {to_text(y_expr)})"
     except Exception:
         return None
-
 
 
 def analyze_function(expr, x: Symbol) -> dict:
@@ -292,12 +286,10 @@ def analyze_function(expr, x: Symbol) -> dict:
     return analysis
 
 
-
 MAX_RECORDED_STEPS = 24
 
 
 def row_op_text(i: int, r: int, factor_value) -> str:
-    """Texto de 'Li ← Li − f·Lr' (usa + quando o fator é negativo)."""
     if factor_value.is_negative:
         sign, mag = "+", -factor_value
     else:
@@ -307,7 +299,6 @@ def row_op_text(i: int, r: int, factor_value) -> str:
 
 
 def gauss_jordan(A: Matrix, pivot_cols: Optional[int] = None, split: Optional[int] = None):
-    """Gauss-Jordan exato. Devolve (matriz final, colunas pivô, passos)."""
     M = A.copy()
     rows, cols = M.shape
     pivot_cols = cols if pivot_cols is None else pivot_cols
@@ -605,7 +596,6 @@ def derivative_steps(expr, x: Symbol, order: int) -> tuple:
 
 
 def int_arg(expr) -> str:
-    """LaTeX do integrando, com parênteses quando é uma soma."""
     return rf"\left({tx(expr)}\right)" if expr.is_Add else tx(expr)
 
 
@@ -708,7 +698,7 @@ def solve_calculus(request: CalculateRequest) -> dict:
             left = simplify(limit(expr, x, a, dir="-"))
             steps.append(step("Limite lateral à direita", rf"\lim_{{{tx(x)} \to {tx(a)}^+}} f = {tx(right)}"))
             steps.append(step("Limite lateral à esquerda", rf"\lim_{{{tx(x)} \to {tx(a)}^-}} f = {tx(left)}"))
-            if simplify(right - left) != 0:
+            if right != left and simplify(right - left) != 0:
                 steps.append(step("Laterais diferentes", note="O limite bilateral não existe."))
                 return ok("O limite não existe (limites laterais diferentes).", r"\text{O limite não existe}", steps)
             value = right
@@ -782,14 +772,12 @@ def solve_calculus(request: CalculateRequest) -> dict:
     return fail(f"Operação de Cálculo não suportada: {operation}")
 
 
-
-# Rotas
-
 @app.get("/")
 def root():
     return {"message": "DDX Math API online"}
 
 
+@app.post("/calculate")
 def calculate(request: CalculateRequest):
     try:
         operation = (request.operation or "").strip()

@@ -6,7 +6,7 @@ export type CalculatePayload = {
   operation: string;
   variable?: string;
   point?: string;
-  direction?: string; // "+", "-" ou "both"
+  direction?: string;
   order?: number;
   definite_integral?: boolean;
   lower_bound?: string;
@@ -77,7 +77,7 @@ export async function calculateMath(
       },
       body: JSON.stringify(payload),
     }),
-    10000 // 10 segundos de timeout
+    10000
   );
 
   const text = await withTimeout(response.text(), 10000);

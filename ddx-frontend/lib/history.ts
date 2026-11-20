@@ -1,7 +1,6 @@
 import { useSyncExternalStore } from "react";
 import type { CalcMode } from "@/lib/math-api";
 
-// Parâmetros necessários para reabrir um cálculo exatamente como foi feito
 export type HistoryParams = {
   expression: string;
   variables: string;
@@ -44,7 +43,6 @@ function readSnapshot(): HistoryEntry[] {
     return EMPTY;
   }
 
-  // Mantém a mesma referência enquanto nada mudou (exigência do useSyncExternalStore)
   if (raw === cache.raw) return cache.value;
 
   let value = EMPTY;
@@ -63,7 +61,7 @@ function write(entries: HistoryEntry[]) {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
   } catch {
-    
+    return;
   }
   listeners.forEach((listener) => listener());
 }

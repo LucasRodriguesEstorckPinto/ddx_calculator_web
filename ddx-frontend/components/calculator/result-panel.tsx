@@ -5,6 +5,7 @@ import { Check, Copy } from "lucide-react";
 
 import { MathTex } from "@/components/calculator/math-tex";
 import { StepsPanel } from "@/components/calculator/steps-panel";
+import { gridToLatex, parseGrid } from "@/lib/grid";
 import type { AnalysisResult, CalcMode, CalcStep } from "@/lib/math-api";
 
 type ResultStatus = "idle" | "success" | "error";
@@ -31,27 +32,6 @@ const STATUS_LABELS: Record<ResultStatus, string> = {
   success: "Processado",
   error: "Erro",
 };
-
-// Converte a grade JSON da entrada em LaTeX para exibir a matriz de forma legível
-function gridToLatex(expression: string): string | null {
-  try {
-    const data: unknown = JSON.parse(expression);
-    if (!Array.isArray(data) || data.length === 0) return null;
-    const body = (data as unknown[][])
-      .map((row) =>
-        row
-          .map((cell) => {
-            const value = String(cell ?? "").trim();
-            return value === "" ? "0" : value;
-          })
-          .join(" & ")
-      )
-      .join(" \\\\ ");
-    return `\\begin{bmatrix} ${body} \\end{bmatrix}`;
-  } catch {
-    return null;
-  }
-}
 
 type AnalysisItem = { label: string; values: string[] | string | undefined };
 
@@ -118,7 +98,8 @@ export function ResultPanel({
 }: ResultPanelProps) {
   const [copied, setCopied] = useState<"text" | "latex" | null>(null);
 
-  const matrixInput = mode === "alglin" ? gridToLatex(expression) : null;
+  const grid = mode === "alglin" ? parseGrid(expression) : null;
+  const matrixInput = grid ? gridToLatex(grid) : null;
   const showFunctionAnalysis =
     selectedOperation === "Estudo de Função" && status === "success" && !!analysis;
 
@@ -128,7 +109,7 @@ export function ResultPanel({
       setCopied(kind);
       setTimeout(() => setCopied(null), 1500);
     } catch {
-      // Clipboard indisponível (ex.: contexto sem HTTPS): ignora silenciosamente
+      setCopied(null);
     }
   }
 

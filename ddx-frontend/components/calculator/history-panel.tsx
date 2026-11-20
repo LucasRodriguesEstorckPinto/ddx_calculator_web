@@ -2,6 +2,7 @@
 
 import { History, RotateCcw, Trash2, X } from "lucide-react";
 
+import { parseGrid } from "@/lib/grid";
 import {
   clearHistory,
   removeHistoryEntry,
@@ -14,15 +15,9 @@ type HistoryPanelProps = {
 };
 
 function previewExpression(entry: HistoryEntry) {
-  if (entry.mode === "alglin") {
-    try {
-      const grid = JSON.parse(entry.params.expression) as string[][];
-      return `Matriz ${grid.length}×${grid[0]?.length ?? 0}`;
-    } catch {
-      return "Matriz";
-    }
-  }
-  return entry.params.expression;
+  if (entry.mode !== "alglin") return entry.params.expression;
+  const grid = parseGrid(entry.params.expression);
+  return grid ? `Matriz ${grid.length}×${grid[0].length}` : "Matriz";
 }
 
 function formatDate(timestamp: number) {

@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
+import { useId, useMemo, type ReactNode } from "react";
 
+import { emptyGrid, parseGrid } from "@/lib/grid";
 import type { CalcMode } from "@/lib/math-api";
 
 type InputPanelProps = {
@@ -16,7 +17,6 @@ type InputPanelProps = {
   setIntervalValue: (value: string) => void;
   onCalculate: () => void;
   loading: boolean;
-  // Props de Cálculo 1
   derivativeOrder: number;
   setDerivativeOrder: (value: number) => void;
   limitPoint: string;
@@ -72,35 +72,31 @@ const MATRIX_HINTS: Record<string, string> = {
   Núcleo: "Encontra uma base do conjunto de vetores v tais que A·v = 0.",
 };
 
+const DERIVATIVE_ORDERS = [1, 2, 3, 4, 5];
 const MAX_DIMENSION = 6;
 
 const fieldClass =
   "w-full rounded-2xl border border-white/8 bg-black/30 px-4 py-4 text-white outline-none transition placeholder:text-zinc-600 focus:border-[#005EB8]/40";
+const subCardClass =
+  "space-y-5 rounded-2xl border border-white/8 bg-white/[0.02] p-4";
+const smallButtonClass =
+  "rounded-xl border border-white/8 px-3 py-2 text-xs text-zinc-300 transition hover:bg-white/5";
 
-const subCardClass = "space-y-5 rounded-2xl border border-white/8 bg-white/[0.02] p-4";
+type FieldProps = {
+  label: ReactNode;
+  children: (id: string) => ReactNode;
+};
 
-function emptyGrid(rows: number, cols: number): string[][] {
-  return Array.from({ length: rows }, () => Array<string>(cols).fill(""));
-}
-
-// A grade é derivada da própria expressão (JSON), que é a única fonte da verdade.
-// Assim, reabrir um item do histórico atualiza a grade automaticamente.
-function parseGrid(expression: string): string[][] {
-  try {
-    const data: unknown = JSON.parse(expression);
-    if (
-      Array.isArray(data) &&
-      data.length > 0 &&
-      data.every(
-        (row) => Array.isArray(row) && row.length > 0 && row.length === data[0].length
-      )
-    ) {
-      return (data as unknown[][]).map((row) => row.map((cell) => String(cell ?? "")));
-    }
-  } catch {
-    // cai no padrão abaixo
-  }
-  return emptyGrid(3, 3);
+function Field({ label, children }: FieldProps) {
+  const id = useId();
+  return (
+    <div>
+      <label htmlFor={id} className="mb-2 block text-sm text-zinc-400">
+        {label}
+      </label>
+      {children(id)}
+    </div>
+  );
 }
 
 function clampDimension(value: number) {
@@ -136,26 +132,32 @@ export function InputPanel({
 }: InputPanelProps) {
   const operations = mode === "alglin" ? ALG_LIN_OPERATIONS : CALC1_OPERATIONS;
 
-  const matrix = useMemo(() => parseGrid(expression), [expression]);
+  const matrix = useMemo(
+    () => parseGrid(expression) ?? emptyGrid(3, 3),
+    [expression]
+  );
   const rows = matrix.length;
   const cols = matrix[0].length;
 
   const updateMatrix = (next: string[][]) => setExpression(JSON.stringify(next));
 
-  // Ao redimensionar, preserva os valores que continuam dentro da nova grade
   const handleDimensionChange = (newRows: number, newCols: number) => {
     const r = clampDimension(newRows);
     const c = clampDimension(newCols);
     updateMatrix(
       Array.from({ length: r }, (_, i) =>
-        Array.from({ length: c }, (_, j) => (i < rows && j < cols ? matrix[i][j] : ""))
+        Array.from({ length: c }, (_, j) =>
+          i < rows && j < cols ? matrix[i][j] : ""
+        )
       )
     );
   };
 
   const handleCellChange = (r: number, c: number, value: string) => {
     updateMatrix(
-      matrix.map((row, i) => row.map((cell, j) => (i === r && j === c ? value : cell)))
+      matrix.map((row, i) =>
+        row.map((cell, j) => (i === r && j === c ? value : cell))
+      )
     );
   };
 
@@ -182,26 +184,27 @@ export function InputPanel({
       </div>
 
       <div className="space-y-5">
-        <div>
-          <label className="mb-2 block text-sm text-zinc-400">Operação</label>
-          <select
-            value={selectedOperation}
-            onChange={(e) => setSelectedOperation(e.target.value)}
-            className={fieldClass}
-          >
-            {operations.map((operation) => (
-              <option key={operation} value={operation}>
-                {operation}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Field label="Operação">
+          {(id) => (
+            <select
+              id={id}
+              value={selectedOperation}
+              onChange={(e) => setSelectedOperation(e.target.value)}
+              className={fieldClass}
+            >
+              {operations.map((operation) => (
+                <option key={operation} value={operation}>
+                  {operation}
+                </option>
+              ))}
+            </select>
+          )}
+        </Field>
 
-        {/* GRADE VISUAL PARA ÁLGEBRA LINEAR OU TEXTAREA PARA CÁLCULO */}
         {mode === "alglin" ? (
           <div className={subCardClass}>
             <div className="flex items-center justify-between">
-              <label className="text-sm text-zinc-400">Dimensões da Matriz</label>
+              <span className="text-sm text-zinc-400">Dimensões da Matriz</span>
               <div className="flex items-center gap-2">
                 <input
                   type="number"
@@ -209,7 +212,9 @@ export function InputPanel({
                   max={MAX_DIMENSION}
                   value={rows}
                   aria-label="Número de linhas"
-                  onChange={(e) => handleDimensionChange(Number(e.target.value), cols)}
+                  onChange={(e) =>
+                    handleDimensionChange(Number(e.target.value), cols)
+                  }
                   className="w-12 rounded-lg border border-white/10 bg-black/40 p-1 text-center text-white"
                 />
                 <span className="text-zinc-500">x</span>
@@ -219,7 +224,9 @@ export function InputPanel({
                   max={MAX_DIMENSION}
                   value={cols}
                   aria-label="Número de colunas"
-                  onChange={(e) => handleDimensionChange(rows, Number(e.target.value))}
+                  onChange={(e) =>
+                    handleDimensionChange(rows, Number(e.target.value))
+                  }
                   className="w-12 rounded-lg border border-white/10 bg-black/40 p-1 text-center text-white"
                 />
               </div>
@@ -252,35 +259,43 @@ export function InputPanel({
               <button
                 type="button"
                 onClick={() => updateMatrix(emptyGrid(rows, cols))}
-                className="rounded-xl border border-white/8 px-3 py-2 text-xs text-zinc-300 transition hover:bg-white/5"
+                className={smallButtonClass}
               >
                 Limpar
               </button>
               <button
                 type="button"
                 onClick={fillIdentity}
-                className="rounded-xl border border-white/8 px-3 py-2 text-xs text-zinc-300 transition hover:bg-white/5"
+                className={smallButtonClass}
               >
                 Identidade
               </button>
             </div>
 
             {MATRIX_HINTS[selectedOperation] && (
-              <p className="text-xs text-zinc-500">{MATRIX_HINTS[selectedOperation]}</p>
+              <p className="text-xs text-zinc-500">
+                {MATRIX_HINTS[selectedOperation]}
+              </p>
             )}
           </div>
         ) : (
           <div>
-            <label className="mb-2 block text-sm text-zinc-400">Expressão</label>
-            <textarea
-              value={expression}
-              onChange={(e) => setExpression(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) onCalculate();
-              }}
-              className={`${fieldClass} min-h-[140px] text-base`}
-              placeholder="Ex.: x**3 - 3*x + 1"
-            />
+            <Field label="Expressão">
+              {(id) => (
+                <textarea
+                  id={id}
+                  value={expression}
+                  onChange={(e) => setExpression(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) {
+                      onCalculate();
+                    }
+                  }}
+                  className={`${fieldClass} min-h-[140px] text-base`}
+                  placeholder="Ex.: x**3 - 3*x + 1"
+                />
+              )}
+            </Field>
             <p className="mt-2 text-xs text-zinc-500">
               Use * para multiplicar e ** ou ^ para potência. Ctrl + Enter calcula.
             </p>
@@ -302,70 +317,74 @@ export function InputPanel({
           </div>
         )}
 
-        {/* CAMPOS DE VARIÁVEL E INTERVALO PARA CÁLCULO 1 */}
         {mode !== "alglin" && (
           <>
-            <div>
-              <label className="mb-2 block text-sm text-zinc-400">Variável</label>
-              <input
-                value={variables}
-                onChange={(e) => setVariables(e.target.value)}
-                className={fieldClass}
-                placeholder="x"
-              />
-            </div>
+            <Field label="Variável">
+              {(id) => (
+                <input
+                  id={id}
+                  value={variables}
+                  onChange={(e) => setVariables(e.target.value)}
+                  className={fieldClass}
+                  placeholder="x"
+                />
+              )}
+            </Field>
 
-            <div>
-              <label className="mb-2 block text-sm text-zinc-400">
-                Intervalo do gráfico
-              </label>
-              <input
-                value={interval}
-                onChange={(e) => setIntervalValue(e.target.value)}
-                className={fieldClass}
-                placeholder="[-10, 10]"
-              />
-            </div>
+            <Field label="Intervalo do gráfico">
+              {(id) => (
+                <input
+                  id={id}
+                  value={interval}
+                  onChange={(e) => setIntervalValue(e.target.value)}
+                  className={fieldClass}
+                  placeholder="[-10, 10]"
+                />
+              )}
+            </Field>
           </>
         )}
 
-        {/* OPÇÕES ESPECÍFICAS DE CADA OPERAÇÃO */}
         {selectedOperation === "Derivada" && (
           <div className={subCardClass}>
-            <div>
-              <label className="mb-2 block text-sm text-zinc-400">
-                Ordem da derivada
-              </label>
-              <select
-                value={derivativeOrder}
-                onChange={(e) => setDerivativeOrder(Number(e.target.value))}
-                className={fieldClass}
-              >
-                {[1, 2, 3, 4, 5].map((order) => (
-                  <option key={order} value={order}>
-                    {order}ª derivada
-                  </option>
-                ))}
-              </select>
-            </div>
+            <Field label="Ordem da derivada">
+              {(id) => (
+                <select
+                  id={id}
+                  value={derivativeOrder}
+                  onChange={(e) => setDerivativeOrder(Number(e.target.value))}
+                  className={fieldClass}
+                >
+                  {DERIVATIVE_ORDERS.map((order) => (
+                    <option key={order} value={order}>
+                      {order}ª derivada
+                    </option>
+                  ))}
+                </select>
+              )}
+            </Field>
           </div>
         )}
 
         {showTangentPoint && (
           <div className={subCardClass}>
-            <div>
-              <label className="mb-2 block text-sm text-zinc-400">
-                {selectedOperation === "Derivada"
+            <Field
+              label={
+                selectedOperation === "Derivada"
                   ? "Ponto da reta tangente no gráfico"
-                  : "Ponto de tangência (x = a)"}
-              </label>
-              <input
-                value={tangentPoint}
-                onChange={(e) => setTangentPoint(e.target.value)}
-                className={fieldClass}
-                placeholder="0"
-              />
-            </div>
+                  : "Ponto de tangência (x = a)"
+              }
+            >
+              {(id) => (
+                <input
+                  id={id}
+                  value={tangentPoint}
+                  onChange={(e) => setTangentPoint(e.target.value)}
+                  className={fieldClass}
+                  placeholder="0"
+                />
+              )}
+            </Field>
           </div>
         )}
 
@@ -383,28 +402,28 @@ export function InputPanel({
 
             {isDefiniteIntegral && (
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="mb-2 block text-sm text-zinc-400">
-                    Limite inferior
-                  </label>
-                  <input
-                    value={lowerBound}
-                    onChange={(e) => setLowerBound(e.target.value)}
-                    className={fieldClass}
-                    placeholder="0"
-                  />
-                </div>
-                <div>
-                  <label className="mb-2 block text-sm text-zinc-400">
-                    Limite superior
-                  </label>
-                  <input
-                    value={upperBound}
-                    onChange={(e) => setUpperBound(e.target.value)}
-                    className={fieldClass}
-                    placeholder="1 ou oo"
-                  />
-                </div>
+                <Field label="Limite inferior">
+                  {(id) => (
+                    <input
+                      id={id}
+                      value={lowerBound}
+                      onChange={(e) => setLowerBound(e.target.value)}
+                      className={fieldClass}
+                      placeholder="0"
+                    />
+                  )}
+                </Field>
+                <Field label="Limite superior">
+                  {(id) => (
+                    <input
+                      id={id}
+                      value={upperBound}
+                      onChange={(e) => setUpperBound(e.target.value)}
+                      className={fieldClass}
+                      placeholder="1 ou oo"
+                    />
+                  )}
+                </Field>
               </div>
             )}
           </div>
@@ -412,29 +431,31 @@ export function InputPanel({
 
         {selectedOperation === "Limite" && (
           <div className={subCardClass}>
-            <div>
-              <label className="mb-2 block text-sm text-zinc-400">
-                x tende a
-              </label>
-              <input
-                value={limitPoint}
-                onChange={(e) => setLimitPoint(e.target.value)}
-                className={fieldClass}
-                placeholder="0, 2, oo ou -oo"
-              />
-            </div>
-            <div>
-              <label className="mb-2 block text-sm text-zinc-400">Direção</label>
-              <select
-                value={limitDirection}
-                onChange={(e) => setLimitDirection(e.target.value)}
-                className={fieldClass}
-              >
-                <option value="both">Bilateral</option>
-                <option value="+">Pela direita (x → a⁺)</option>
-                <option value="-">Pela esquerda (x → a⁻)</option>
-              </select>
-            </div>
+            <Field label="x tende a">
+              {(id) => (
+                <input
+                  id={id}
+                  value={limitPoint}
+                  onChange={(e) => setLimitPoint(e.target.value)}
+                  className={fieldClass}
+                  placeholder="0, 2, oo ou -oo"
+                />
+              )}
+            </Field>
+            <Field label="Direção">
+              {(id) => (
+                <select
+                  id={id}
+                  value={limitDirection}
+                  onChange={(e) => setLimitDirection(e.target.value)}
+                  className={fieldClass}
+                >
+                  <option value="both">Bilateral</option>
+                  <option value="+">Pela direita (x → a⁺)</option>
+                  <option value="-">Pela esquerda (x → a⁻)</option>
+                </select>
+              )}
+            </Field>
           </div>
         )}
 

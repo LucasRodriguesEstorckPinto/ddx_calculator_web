@@ -16,24 +16,19 @@ import {
   type CalcMode,
   type CalcStep,
 } from "@/lib/math-api";
+import { EMPTY_GRID_JSON } from "@/lib/grid";
 import {
   addHistoryEntry,
   type HistoryEntry,
   type HistoryParams,
 } from "@/lib/history";
 
-const EMPTY_MATRIX = JSON.stringify([
-  ["", "", ""],
-  ["", "", ""],
-  ["", "", ""],
-]);
-
 const IDLE_MESSAGE = "Ainda não calculado";
 
 export function CalculatorShell() {
   const [mode, setMode] = useState<CalcMode>("alglin");
 
-  const [expression, setExpression] = useState(EMPTY_MATRIX);
+  const [expression, setExpression] = useState(EMPTY_GRID_JSON);
   const [selectedOperation, setSelectedOperation] = useState("Escalonamento");
   const [variables, setVariables] = useState("");
 
@@ -82,7 +77,6 @@ export function CalculatorShell() {
     return "Não foi possível conectar ao backend matemático.";
   }
 
-  // Recebe os valores explicitamente para poder ser chamada logo após restaurar o histórico
   async function runCalculation(
     calcMode: CalcMode,
     operation: string,
@@ -163,7 +157,6 @@ export function CalculatorShell() {
 
   function handleOperationChange(operation: string) {
     setSelectedOperation(operation);
-    // O resultado antigo não pertence mais à operação escolhida
     resetOutput();
   }
 
@@ -171,7 +164,7 @@ export function CalculatorShell() {
     setMode(nextMode);
 
     if (nextMode === "alglin") {
-      setExpression(EMPTY_MATRIX);
+      setExpression(EMPTY_GRID_JSON);
       setSelectedOperation("Escalonamento");
       setVariables("");
     } else {
@@ -306,7 +299,6 @@ export function CalculatorShell() {
               analysis={analysis}
             />
 
-            {}
             {mode === "calc1" && (
               <GraphPanel
                 expression={expression}
