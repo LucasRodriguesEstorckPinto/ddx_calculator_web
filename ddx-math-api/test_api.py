@@ -118,3 +118,21 @@ def test_unknown_origin_does_not_receive_cors_header(client):
         },
     )
     assert "access-control-allow-origin" not in response.headers
+
+
+@pytest.mark.parametrize(
+    "field, value",
+    [
+        ("expression", "x" * 20_001),
+        ("operation", "x" * 65),
+        ("variable", "x" * 65),
+        ("point", "1" * 301),
+        ("lower_bound", "1" * 301),
+        ("upper_bound", "1" * 301),
+    ],
+)
+def test_oversized_fields_are_rejected_before_any_work(client, field, value):
+    payload = {"operation": "Derivada", "expression": "x", "mode": "calc1"}
+    payload[field] = value
+
+    assert client.post("/calculate", json=payload).status_code == 422

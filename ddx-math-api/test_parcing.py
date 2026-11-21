@@ -3,7 +3,7 @@ import json
 import pytest
 from sympy import Matrix, Symbol, cos, oo, sin
 
-from main import InvalidInput, parse_math, parse_matrix, parse_point
+from parsing import InvalidInput, parse_math, parse_matrix, parse_point
 
 x = Symbol("x")
 
