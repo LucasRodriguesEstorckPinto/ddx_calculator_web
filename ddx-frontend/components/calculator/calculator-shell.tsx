@@ -66,6 +66,9 @@ export function CalculatorShell() {
       if (err.message === "TIMEOUT") {
         return "O backend demorou demais para responder.";
       }
+      if (err.message.startsWith("HTTP_503")) {
+        return "O servidor está ocupado. Tente novamente em instantes.";
+      }
       if (err.message.startsWith("HTTP_")) {
         return `Erro do servidor: ${err.message.replace("HTTP_", "")}`;
       }

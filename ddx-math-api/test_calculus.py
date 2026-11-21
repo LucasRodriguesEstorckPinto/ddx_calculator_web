@@ -1,7 +1,7 @@
 import pytest
 from sympy import Symbol, exp, simplify, sin, sqrt, sympify
 
-from main import derivative_rule, integral_rule
+from calculus import derivative_rule, integral_rule
 
 x = Symbol("x")
 

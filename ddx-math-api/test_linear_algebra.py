@@ -4,7 +4,8 @@ import random
 import pytest
 from sympy import Matrix, eye, sympify
 
-from main import MAX_RECORDED_STEPS, matrix_tex
+from formatting import matrix_tex
+from linear_algebra import MAX_RECORDED_STEPS
 
 SQUARE_ONLY = [
     "Determinante",

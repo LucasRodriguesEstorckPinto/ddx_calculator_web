@@ -240,6 +240,7 @@ describe("CalculatorShell outcomes", () => {
   it.each([
     ["TIMEOUT", "O backend demorou demais para responder."],
     ["HTTP_500: boom", "Erro do servidor: 500: boom"],
+    ['HTTP_503: {"error":"busy"}', "O servidor está ocupado. Tente novamente em instantes."],
     ["INVALID_JSON: <html>", "O backend respondeu, mas o JSON veio inválido."],
     ["Failed to fetch", "Não foi possível conectar ao backend matemático."],
   ])("translates the failure %s into a friendly message", async (raw, friendly) => {

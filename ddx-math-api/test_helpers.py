@@ -1,16 +1,15 @@
 import pytest
-from sympy import Integer, Interval, Matrix, S, Symbol, Union, oo, sin
+from sympy import Integer, Interval, Matrix, S, Symbol, Union, oo
 
-from main import (
-    gauss_jordan,
+from formatting import (
     matrix_tex,
     normalize_interval_set,
     normalize_set_output,
-    row_op_text,
     safe_real_number,
     to_text,
     try_build_point,
 )
+from linear_algebra import gauss_jordan, row_op_text
 
 x = Symbol("x")
 
